@@ -5,22 +5,22 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BochanAudioLib", "BochanAudioLib\BochanAudioLib.vcxproj", "{FCEDACFD-70E9-4A89-900E-53D42D012BB3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BochanConsole", "BochanConsole\BochanConsole.vcxproj", "{89186727-BF91-47D4-8BD3-205DE9FEAE50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Debug|x64.ActiveCfg = Debug|x64
 		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Debug|x64.Build.0 = Debug|x64
-		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Debug|x86.ActiveCfg = Debug|Win32
-		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Debug|x86.Build.0 = Debug|Win32
 		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Release|x64.ActiveCfg = Release|x64
 		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Release|x64.Build.0 = Release|x64
-		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Release|x86.ActiveCfg = Release|Win32
-		{FCEDACFD-70E9-4A89-900E-53D42D012BB3}.Release|x86.Build.0 = Release|Win32
+		{89186727-BF91-47D4-8BD3-205DE9FEAE50}.Debug|x64.ActiveCfg = Debug|x64
+		{89186727-BF91-47D4-8BD3-205DE9FEAE50}.Debug|x64.Build.0 = Debug|x64
+		{89186727-BF91-47D4-8BD3-205DE9FEAE50}.Release|x64.ActiveCfg = Release|x64
+		{89186727-BF91-47D4-8BD3-205DE9FEAE50}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
