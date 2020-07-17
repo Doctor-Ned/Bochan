@@ -24,7 +24,7 @@
     <ClInclude Include="AudioEncoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BochanAudioEncoder.h">
+    <ClInclude Include="CodecUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BochanAudioEncoder.cpp">
+    <ClCompile Include="CodecUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

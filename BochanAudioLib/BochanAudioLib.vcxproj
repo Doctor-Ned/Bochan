@@ -95,12 +95,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AudioEncoder.h" />
-    <ClInclude Include="BochanAudioEncoder.h" />
+    <ClInclude Include="CodecUtil.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BochanAudioEncoder.cpp" />
+    <ClCompile Include="CodecUtil.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -58,7 +58,7 @@
       <PreprocessorDefinitions>_DEBUG;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -87,7 +87,7 @@
       <PreprocessorDefinitions>NDEBUG;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
