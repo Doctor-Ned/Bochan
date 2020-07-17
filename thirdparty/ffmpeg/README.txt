@@ -1,6 +1,6 @@
 Zeranoe FFmpeg Builds <http://ffmpeg.zeranoe.com/builds/>
 
-Build: ffmpeg-20200716-d11cc74-win64-shared
+Build: ffmpeg-4.3-win64-shared
 
 Configuration:
   --disable-static
@@ -88,7 +88,7 @@ Libraries:
   zlib              1.2.11            <http://zlib.net>
   GMP               6.2.0             <https://gmplib.org>
   vid.stab          20190213-aeabc8d  <http://public.hronopik.de/vid.stab>
-  VMAF              20200710-461cf32  <https://github.com/Netflix/vmaf>
+  VMAF              20200617-3ff32b8  <https://github.com/Netflix/vmaf>
   Vorbis            20200616-5fd186e  <http://vorbis.com>
   VisualOn AMR-WB   20141107-3b3fcd0  <https://sourceforge.net/projects/opencore-amr>
   libmysofa         20200614-90f0089  <https://github.com/hoene/libmysofa>
