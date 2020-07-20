@@ -16,5 +16,8 @@ namespace bochan {
     private:
         AVCodecID codecId{};
         AVCodec* codec{ nullptr };
+        AVCodecContext* context{ nullptr };
+        AVPacket* packet{ nullptr };
+        AVFrame* frame{ nullptr };
     };
 }

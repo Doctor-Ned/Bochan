@@ -32,12 +32,12 @@ int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
 AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
     switch (codec) {
         default:
-            return AV_CODEC_ID_NONE;
+            return AVCodecID::AV_CODEC_ID_NONE;
         case BochanCodec::AAC:
-            return AV_CODEC_ID_AAC;
+            return AVCodecID::AV_CODEC_ID_AAC;
         case BochanCodec::FLAC:
-            return AV_CODEC_ID_FLAC;
+            return AVCodecID::AV_CODEC_ID_FLAC;
         case BochanCodec::Opus:
-            return AV_CODEC_ID_OPUS;
+            return AVCodecID::AV_CODEC_ID_OPUS;
     }
 }

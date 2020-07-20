@@ -6,6 +6,8 @@ extern "C" {
 #include <libavcodec\avcodec.h>
 }
 
+#define ERROR_BUFF_SIZE 1024
+
 namespace bochan {
     class BOCHANAPI CodecUtil sealed {
     public:
