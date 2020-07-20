@@ -62,9 +62,6 @@
     <ClCompile Include="BochanLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BufferPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

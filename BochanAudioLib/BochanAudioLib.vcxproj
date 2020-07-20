@@ -108,7 +108,6 @@
   <ItemGroup>
     <ClCompile Include="BochanEncoder.cpp" />
     <ClCompile Include="BochanLog.cpp" />
-    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="BufferPool.cpp" />
     <ClCompile Include="CodecUtil.cpp" />
     <ClCompile Include="dllmain.cpp" />

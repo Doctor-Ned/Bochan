@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BochanCodec.h"
+#include "Buffer.h"
 
 namespace bochan {
     class BOCHANAPI AudioEncoder {
