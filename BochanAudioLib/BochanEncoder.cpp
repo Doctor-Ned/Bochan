@@ -153,7 +153,6 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(Buffer<uint16_t>*
         ByteBuffer* buff = bufferPool->getBuffer(packet->size);
         memcpy(buff->getPointer(), packet->data, packet->size);
         result.push_back(buff);
-        av_packet_unref(packet);
     }
     return result;
 }
