@@ -35,8 +35,6 @@ AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
             return AVCodecID::AV_CODEC_ID_NONE;
         case BochanCodec::AAC:
             return AVCodecID::AV_CODEC_ID_AAC;
-        case BochanCodec::FLAC:
-            return AVCodecID::AV_CODEC_ID_FLAC;
         case BochanCodec::Opus:
             return AVCodecID::AV_CODEC_ID_OPUS;
     }

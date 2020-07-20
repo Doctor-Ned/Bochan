@@ -78,6 +78,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
+    bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
     initialized = true;
     return true;
 }
@@ -94,6 +95,7 @@ void bochan::BochanEncoder::deinitialize() {
     if (context) {
         avcodec_free_context(&context);
     }
+    bytesPerSample = 0;
     codec = nullptr;
     codecId = AV_CODEC_ID_NONE;
     bochanCodec = BochanCodec::None;
@@ -121,15 +123,18 @@ int bochan::BochanEncoder::getSamplesPerFrame() const {
     return initialized ? context->frame_size : 0;
 }
 
-std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(Buffer<uint16_t>* samples) {
+std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);
         BOCHAN_ERROR("Failed to ensure writable frame: {}", err);
         return {};
     }
-    if (samples->getSize() != context->frame_size) {
-        BOCHAN_ERROR("Failed to encode audio frame! Expected {} samples, got {}.", context->frame_size, samples->getSize());
+    size_t expectedSamples = static_cast<size_t>(context->frame_size * context->channels);
+    size_t providedSamples = samples->getByteSize() / bytesPerSample;
+    if (providedSamples != expectedSamples) {
+        BOCHAN_ERROR("Failed to encode audio frame! Expected {} samples, got {}.",
+                     expectedSamples, providedSamples);
         return {};
     }
     memcpy(frame->data[0], samples, samples->getByteSize());

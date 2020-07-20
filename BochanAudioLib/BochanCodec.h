@@ -5,8 +5,8 @@
 namespace bochan {
     enum class BOCHANAPI BochanCodec {
         None,
+        WAV,
         AAC,
-        FLAC,
         Opus
     };
 }

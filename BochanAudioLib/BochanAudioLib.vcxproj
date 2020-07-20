@@ -94,9 +94,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AudioCoder.h" />
+    <ClInclude Include="AudioDecoder.h" />
     <ClInclude Include="AudioEncoder.h" />
     <ClInclude Include="BochanAPI.h" />
     <ClInclude Include="BochanCodec.h" />
+    <ClInclude Include="BochanDecoder.h" />
     <ClInclude Include="BochanEncoder.h" />
     <ClInclude Include="BochanLog.h" />
     <ClInclude Include="Buffer.h" />
@@ -106,6 +109,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BochanDecoder.cpp" />
     <ClCompile Include="BochanEncoder.cpp" />
     <ClCompile Include="BochanLog.cpp" />
     <ClCompile Include="BufferPool.cpp" />

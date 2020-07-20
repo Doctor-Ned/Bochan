@@ -5,6 +5,7 @@ namespace bochan {
     class BufferPool sealed {
     public:
         BOCHANAPI BufferPool(size_t maxSize);
+        BOCHANAPI ~BufferPool();
         BOCHANAPI ByteBuffer* getBuffer(size_t size);
         BOCHANAPI bool freeBuffer(ByteBuffer* buffer);
         BOCHANAPI bool freeAndRemoveBuffer(ByteBuffer* buffer);

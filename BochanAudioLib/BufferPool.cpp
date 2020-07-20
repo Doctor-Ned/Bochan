@@ -3,6 +3,14 @@
 
 bochan::BufferPool::BufferPool(size_t maxSize) : maxSize(maxSize) {}
 
+bochan::BufferPool::~BufferPool() {
+    std::lock_guard lock(mutex);
+    for (ByteBuffer* buff : usedBuffers) {
+        freeBuffer(buff);
+    }
+    flushUnused();
+}
+
 bochan::ByteBuffer* bochan::BufferPool::getBuffer(size_t size) {
     std::lock_guard lock(mutex);
     for (std::vector<bochan::ByteBuffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {

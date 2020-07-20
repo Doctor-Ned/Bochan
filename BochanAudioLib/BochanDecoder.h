@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AudioEncoder.h"
+#include "AudioDecoder.h"
 #include "BufferPool.h"
 
 extern "C" {
@@ -8,29 +8,30 @@ extern "C" {
 }
 
 namespace bochan {
-    class BOCHANAPI BochanEncoder sealed : public AudioEncoder{
+    class BOCHANAPI BochanDecoder sealed : public AudioDecoder{
     public:
-        BochanEncoder(BufferPool * bufferPool);
-        ~BochanEncoder();
+        BochanDecoder(BufferPool * bufferPool);
+        ~BochanDecoder();
         bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) override;
         void deinitialize() override;
         bool isInitialized() const override;
         BochanCodec getCodec() const override;
         int getSampleRate() const override;
         unsigned long long getBitRate() const override;
-        int getSamplesPerFrame() const override;
-        std::vector<ByteBuffer*> encode(ByteBuffer* samples) override;
+        std::vector<ByteBuffer*> decode(ByteBuffer* samples) override;
     private:
         bool initialized{ false };
         BochanCodec bochanCodec{ BochanCodec::None };
         int sampleRate{ 0 };
         unsigned long long bitRate{ 0ULL };
-        int bytesPerSample{0};
+        int bytesPerSample{ 0 };
         AVCodecID codecId{};
         AVCodec* codec{ nullptr };
         AVCodecContext* context{ nullptr };
+        AVCodecParserContext* parser{ nullptr };
         AVPacket* packet{ nullptr };
         AVFrame* frame{ nullptr };
         BufferPool* bufferPool{ nullptr };
     };
 }
+
