@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "CodecUtil.h"
 
-bool CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFormat format) {
+#include <stdexcept>
+
+bool bochan::CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFormat format) {
     const enum AVSampleFormat* it = codec->sample_fmts;
     while (*it != AV_SAMPLE_FMT_NONE) {
         if (format == *it) {
@@ -12,7 +14,7 @@ bool CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFormat for
     return false;
 }
 
-int CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
+int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
     int sampleRate = 0;
 
     if (!codec->supported_samplerates)
@@ -25,4 +27,17 @@ int CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
         ++it;
     }
     return sampleRate;
+}
+
+AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
+    switch (codec) {
+        default:
+            return AV_CODEC_ID_NONE;
+        case BochanCodec::AAC:
+            return AV_CODEC_ID_AAC;
+        case BochanCodec::FLAC:
+            return AV_CODEC_ID_FLAC;
+        case BochanCodec::Opus:
+            return AV_CODEC_ID_OPUS;
+    }
 }
