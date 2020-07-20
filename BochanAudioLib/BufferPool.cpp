@@ -26,34 +26,20 @@ bochan::Buffer* bochan::BufferPool::getBuffer(size_t size) {
     return buff;
 }
 
-bool bochan::BufferPool::freeBuffer(Buffer* buffer, bool remove) {
-    std::lock_guard lock(mutex);
-    std::vector<bochan::Buffer*>::iterator it = std::find(usedBuffers.begin(), usedBuffers.end(), buffer);
-    if (it == usedBuffers.end()) {
-        return false;
-    }
-    usedBuffers.erase(it);
-    usedSize -= buffer->getSize();
-    if (remove) {
-        removeBuffer(buffer, false);
-    } else {
-        addToFreeBuffers(buffer);
-    }
-    return true;
+bool bochan::BufferPool::freeBuffer(Buffer* buffer) {
+    return freeBuffer(buffer, false);
 }
 
-bool bochan::BufferPool::removeBuffer(Buffer* buffer, bool checkIfFree) {
+bool bochan::BufferPool::freeAndRemoveBuffer(Buffer* buffer) {
+    return freeBuffer(buffer, true);
+}
+
+BOCHANAPI void bochan::BufferPool::flushUnused() {
     std::lock_guard lock(mutex);
-    if (checkIfFree) {
-        std::vector<bochan::Buffer*>::iterator it = std::find(freeBuffers.begin(), freeBuffers.end(), buffer);
-        if (it == freeBuffers.end()) {
-            return false;
-        }
-        freeBuffers.erase(it);
+    for (std::vector<bochan::Buffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
+        deleteBuffer(*it, false);
     }
-    byteSize -= buffer->getSize();
-    delete buffer;
-    return true;
+    freeBuffers.clear();
 }
 
 size_t bochan::BufferPool::getTotalSize() const {
@@ -71,8 +57,29 @@ size_t bochan::BufferPool::getFreeSize() const {
     return byteSize - usedSize;
 }
 
+size_t bochan::BufferPool::getUnallocatedSize() const {
+    std::lock_guard lock(mutex);
+    return maxSize - byteSize;
+}
+
 size_t bochan::BufferPool::getMaxSize() const {
     return maxSize;
+}
+
+bool bochan::BufferPool::freeBuffer(Buffer* buffer, bool remove) {
+    std::lock_guard lock(mutex);
+    std::vector<bochan::Buffer*>::iterator it = std::find(usedBuffers.begin(), usedBuffers.end(), buffer);
+    if (it == usedBuffers.end()) {
+        return false;
+    }
+    usedBuffers.erase(it);
+    usedSize -= buffer->getSize();
+    if (remove) {
+        deleteBuffer(buffer, false);
+    } else {
+        addToFreeBuffers(buffer);
+    }
+    return true;
 }
 
 void bochan::BufferPool::addUsed(Buffer* buffer) {
@@ -106,4 +113,18 @@ void bochan::BufferPool::addToFreeBuffers(Buffer* buffer) {
             }
         }
     }
+}
+
+bool bochan::BufferPool::deleteBuffer(Buffer* buffer, bool checkIfFree) {
+    std::lock_guard lock(mutex);
+    if (checkIfFree) {
+        std::vector<bochan::Buffer*>::iterator it = std::find(freeBuffers.begin(), freeBuffers.end(), buffer);
+        if (it == freeBuffers.end()) {
+            return false;
+        }
+        freeBuffers.erase(it);
+    }
+    byteSize -= buffer->getSize();
+    delete buffer;
+    return true;
 }
