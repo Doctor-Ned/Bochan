@@ -1,15 +1,13 @@
 // BochanConsole.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include "BochanEncoder.h"
 
 #include <iostream>
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-}
+
+using namespace bochan;
 
 int main() {
-    AVFrame* frame = av_frame_alloc();
-    av_frame_free(&frame);
+    BochanEncoder encoder;
+    encoder.initialize(BochanCodec::AAC, 48000, 64000);
     return 0;
 }
