@@ -99,6 +99,8 @@
     <ClInclude Include="BochanCodec.h" />
     <ClInclude Include="BochanEncoder.h" />
     <ClInclude Include="BochanLog.h" />
+    <ClInclude Include="Buffer.h" />
+    <ClInclude Include="BufferPool.h" />
     <ClInclude Include="CodecUtil.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
@@ -106,6 +108,8 @@
   <ItemGroup>
     <ClCompile Include="BochanEncoder.cpp" />
     <ClCompile Include="BochanLog.cpp" />
+    <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="BufferPool.cpp" />
     <ClCompile Include="CodecUtil.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">

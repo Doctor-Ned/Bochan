@@ -13,10 +13,11 @@ namespace bochan {
         ~BochanEncoder();
         bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) override;
         void deinitialize() override;
-        bool isInitialized() override;
-        BochanCodec getCodec() override;
-        int getSampleRate() override;
-        unsigned long long getBitRate() override;
+        bool isInitialized() const override;
+        BochanCodec getCodec() const override;
+        int getSampleRate() const override;
+        unsigned long long getBitRate() const override;
+        int getSamplesPerFrame() const override;
     private:
         bool initialized{ false };
         BochanCodec bochanCodec{ BochanCodec::None };

@@ -102,18 +102,22 @@ void bochan::BochanEncoder::deinitialize() {
     bitRate = 0ULL;
 }
 
-bool bochan::BochanEncoder::isInitialized() {
+bool bochan::BochanEncoder::isInitialized() const {
     return initialized;
 }
 
-bochan::BochanCodec bochan::BochanEncoder::getCodec() {
+bochan::BochanCodec bochan::BochanEncoder::getCodec() const {
     return bochanCodec;
 }
 
-int bochan::BochanEncoder::getSampleRate() {
+int bochan::BochanEncoder::getSampleRate() const {
     return sampleRate;
 }
 
-unsigned long long bochan::BochanEncoder::getBitRate() {
+unsigned long long bochan::BochanEncoder::getBitRate() const {
     return bitRate;
+}
+
+int bochan::BochanEncoder::getSamplesPerFrame() const {
+    return initialized ? context->frame_size : 0;
 }
