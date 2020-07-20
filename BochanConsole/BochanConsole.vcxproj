@@ -55,7 +55,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;BOCHAN_LOG_LEVEL=BOCHAN_LEVEL_DEBUG;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include</AdditionalIncludeDirectories>
@@ -84,7 +84,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;BOCHAN_LOG_LEVEL=BOCHAN_LEVEL_INFO;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include</AdditionalIncludeDirectories>

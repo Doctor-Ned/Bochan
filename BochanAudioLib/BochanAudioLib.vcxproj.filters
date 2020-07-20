@@ -36,6 +36,9 @@
     <ClInclude Include="BochanEncoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BochanLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BochanEncoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BochanLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
