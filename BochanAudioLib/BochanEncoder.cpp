@@ -2,7 +2,7 @@
 #include "CodecUtil.h"
 #include "BochanEncoder.h"
 
-bochan::BochanEncoder::BochanEncoder() {}
+bochan::BochanEncoder::BochanEncoder(BufferPool* bufferPool) : bufferPool(bufferPool) {}
 
 bochan::BochanEncoder::~BochanEncoder() {
     deinitialize();
@@ -49,7 +49,6 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     context->sample_rate = sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
-    // initialize sample rate, format, bitrate etc.
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);
@@ -120,4 +119,41 @@ unsigned long long bochan::BochanEncoder::getBitRate() const {
 
 int bochan::BochanEncoder::getSamplesPerFrame() const {
     return initialized ? context->frame_size : 0;
+}
+
+std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(Buffer<uint16_t>* samples) {
+    if (int ret = av_frame_make_writable(frame); ret < 0) {
+        char err[ERROR_BUFF_SIZE] = { 0 };
+        av_strerror(ret, err, ERROR_BUFF_SIZE);
+        BOCHAN_ERROR("Failed to ensure writable frame: {}", err);
+        return {};
+    }
+    if (samples->getSize() != context->frame_size) {
+        BOCHAN_ERROR("Failed to encode audio frame! Expected {} samples, got {}.", context->frame_size, samples->getSize());
+        return {};
+    }
+    memcpy(frame->data[0], samples, samples->getByteSize());
+    if (int ret = avcodec_send_frame(context, frame); ret < 0) {
+        char err[ERROR_BUFF_SIZE] = { 0 };
+        av_strerror(ret, err, ERROR_BUFF_SIZE);
+        BOCHAN_ERROR("Failed to send frame to encoder: {}", err);
+        return {};
+    }
+    std::vector<ByteBuffer*> result;
+    while (true) {
+        int ret = avcodec_receive_packet(context, packet);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+            break;
+        } else if (ret < 0) {
+            char err[ERROR_BUFF_SIZE] = { 0 };
+            av_strerror(ret, err, ERROR_BUFF_SIZE);
+            BOCHAN_ERROR("Failed to encode audio frame: {}", err);
+            return {};
+        }
+        ByteBuffer* buff = bufferPool->getBuffer(packet->size);
+        memcpy(buff->getPointer(), packet->data, packet->size);
+        result.push_back(buff);
+        av_packet_unref(packet);
+    }
+    return result;
 }

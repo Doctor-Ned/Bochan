@@ -2,6 +2,7 @@
 #include "pch.h"
 
 namespace bochan {
+    template <typename T>
     class BOCHANAPI Buffer sealed {
     public:
         Buffer(size_t size);
@@ -10,10 +11,13 @@ namespace bochan {
         Buffer(Buffer&&) = delete;
         Buffer& operator=(Buffer&) = delete;
         Buffer& operator=(Buffer&&) = delete;
-        uint8_t* getPointer() const;
+        T* getPointer() const;
         size_t getSize() const;
+        size_t getByteSize() const;
     private:
-        uint8_t* data;
-        size_t size;
+        T* data;
+        size_t size, byteSize;
     };
+
+    using ByteBuffer = Buffer<uint8_t>;
 }

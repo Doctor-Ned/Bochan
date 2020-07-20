@@ -14,5 +14,6 @@ namespace bochan {
         virtual int getSampleRate() const = 0;
         virtual unsigned long long getBitRate() const = 0;
         virtual int getSamplesPerFrame() const = 0;
+        virtual std::vector<ByteBuffer*> encode(Buffer<uint16_t>* samples) = 0;
     };
 }

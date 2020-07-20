@@ -3,14 +3,14 @@
 
 bochan::BufferPool::BufferPool(size_t maxSize) : maxSize(maxSize) {}
 
-bochan::Buffer* bochan::BufferPool::getBuffer(size_t size) {
+bochan::ByteBuffer* bochan::BufferPool::getBuffer(size_t size) {
     std::lock_guard lock(mutex);
-    for (std::vector<bochan::Buffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
+    for (std::vector<bochan::ByteBuffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
         if ((*it)->getSize() < size) {
             continue;
         }
         if ((*it)->getSize() == size) {
-            Buffer* buff = *it;
+            ByteBuffer* buff = *it;
             freeBuffers.erase(it);
             addUsed(buff);
             return buff;
@@ -18,7 +18,7 @@ bochan::Buffer* bochan::BufferPool::getBuffer(size_t size) {
             break;
         }
     }
-    Buffer* buff = addBuffer(size, false);
+    ByteBuffer* buff = addBuffer(size, false);
     if (!buff) {
         return nullptr;
     }
@@ -26,17 +26,17 @@ bochan::Buffer* bochan::BufferPool::getBuffer(size_t size) {
     return buff;
 }
 
-bool bochan::BufferPool::freeBuffer(Buffer* buffer) {
+bool bochan::BufferPool::freeBuffer(ByteBuffer* buffer) {
     return freeBuffer(buffer, false);
 }
 
-bool bochan::BufferPool::freeAndRemoveBuffer(Buffer* buffer) {
+bool bochan::BufferPool::freeAndRemoveBuffer(ByteBuffer* buffer) {
     return freeBuffer(buffer, true);
 }
 
 BOCHANAPI void bochan::BufferPool::flushUnused() {
     std::lock_guard lock(mutex);
-    for (std::vector<bochan::Buffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
+    for (std::vector<bochan::ByteBuffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
         deleteBuffer(*it, false);
     }
     freeBuffers.clear();
@@ -66,9 +66,9 @@ size_t bochan::BufferPool::getMaxSize() const {
     return maxSize;
 }
 
-bool bochan::BufferPool::freeBuffer(Buffer* buffer, bool remove) {
+bool bochan::BufferPool::freeBuffer(ByteBuffer* buffer, bool remove) {
     std::lock_guard lock(mutex);
-    std::vector<bochan::Buffer*>::iterator it = std::find(usedBuffers.begin(), usedBuffers.end(), buffer);
+    std::vector<bochan::ByteBuffer*>::iterator it = std::find(usedBuffers.begin(), usedBuffers.end(), buffer);
     if (it == usedBuffers.end()) {
         return false;
     }
@@ -82,16 +82,16 @@ bool bochan::BufferPool::freeBuffer(Buffer* buffer, bool remove) {
     return true;
 }
 
-void bochan::BufferPool::addUsed(Buffer* buffer) {
+void bochan::BufferPool::addUsed(ByteBuffer* buffer) {
     std::lock_guard lock(mutex);
     usedBuffers.push_back(buffer);
     usedSize += buffer->getSize();
 }
 
-bochan::Buffer* bochan::BufferPool::addBuffer(size_t size, bool setFree) {
+bochan::ByteBuffer* bochan::BufferPool::addBuffer(size_t size, bool setFree) {
     std::lock_guard lock(mutex);
     if (byteSize + size <= maxSize) {
-        Buffer* buff = new Buffer(size);
+        ByteBuffer* buff = new ByteBuffer(size);
         byteSize += size;
         if (setFree) {
             addToFreeBuffers(buff);
@@ -101,12 +101,12 @@ bochan::Buffer* bochan::BufferPool::addBuffer(size_t size, bool setFree) {
     return nullptr;
 }
 
-void bochan::BufferPool::addToFreeBuffers(Buffer* buffer) {
+void bochan::BufferPool::addToFreeBuffers(ByteBuffer* buffer) {
     std::lock_guard lock(mutex);
     if (freeBuffers.empty() || freeBuffers[0]->getSize() >= buffer->getSize()) {
         freeBuffers.push_back(buffer);
     } else {
-        for (std::vector<bochan::Buffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
+        for (std::vector<bochan::ByteBuffer*>::iterator it = freeBuffers.begin(); it != freeBuffers.end(); ++it) {
             if ((*it)->getSize() <= buffer->getSize()) {
                 freeBuffers.insert(it + 1, buffer);
                 break;
@@ -115,10 +115,10 @@ void bochan::BufferPool::addToFreeBuffers(Buffer* buffer) {
     }
 }
 
-bool bochan::BufferPool::deleteBuffer(Buffer* buffer, bool checkIfFree) {
+bool bochan::BufferPool::deleteBuffer(ByteBuffer* buffer, bool checkIfFree) {
     std::lock_guard lock(mutex);
     if (checkIfFree) {
-        std::vector<bochan::Buffer*>::iterator it = std::find(freeBuffers.begin(), freeBuffers.end(), buffer);
+        std::vector<bochan::ByteBuffer*>::iterator it = std::find(freeBuffers.begin(), freeBuffers.end(), buffer);
         if (it == freeBuffers.end()) {
             return false;
         }

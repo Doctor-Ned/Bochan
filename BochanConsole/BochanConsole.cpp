@@ -7,7 +7,8 @@
 using namespace bochan;
 
 int main() {
-    BochanEncoder encoder;
+    BufferPool bufferPool(1024 * 1024 * 1024);
+    BochanEncoder encoder(&bufferPool);
     encoder.initialize(BochanCodec::AAC, 48000, 64000);
     return 0;
 }

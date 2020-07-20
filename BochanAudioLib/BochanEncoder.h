@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AudioEncoder.h"
+#include "BufferPool.h"
 
 extern "C" {
 #include <libavformat\avformat.h>
@@ -9,7 +10,7 @@ extern "C" {
 namespace bochan {
     class BOCHANAPI BochanEncoder : public AudioEncoder {
     public:
-        BochanEncoder();
+        BochanEncoder(BufferPool* bufferPool);
         ~BochanEncoder();
         bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) override;
         void deinitialize() override;
@@ -18,6 +19,7 @@ namespace bochan {
         int getSampleRate() const override;
         unsigned long long getBitRate() const override;
         int getSamplesPerFrame() const override;
+        std::vector<ByteBuffer*> encode(Buffer<uint16_t>* samples) override;
     private:
         bool initialized{ false };
         BochanCodec bochanCodec{ BochanCodec::None };
@@ -28,5 +30,6 @@ namespace bochan {
         AVCodecContext* context{ nullptr };
         AVPacket* packet{ nullptr };
         AVFrame* frame{ nullptr };
+        BufferPool* bufferPool{ nullptr };
     };
 }
