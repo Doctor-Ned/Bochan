@@ -33,9 +33,23 @@ AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
     switch (codec) {
         default:
             return AVCodecID::AV_CODEC_ID_NONE;
+        case BochanCodec::FLAC:
+            return AVCodecID::AV_CODEC_ID_FLAC;
         case BochanCodec::AAC:
             return AVCodecID::AV_CODEC_ID_AAC;
         case BochanCodec::Opus:
             return AVCodecID::AV_CODEC_ID_OPUS;
+    }
+}
+
+AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) {
+    switch (codec) {
+        default:
+            return AVSampleFormat::AV_SAMPLE_FMT_NONE;
+        case BochanCodec::AAC:
+            return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
+        case BochanCodec::FLAC:
+        case BochanCodec::Opus:
+            return AVSampleFormat::AV_SAMPLE_FMT_S16;
     }
 }

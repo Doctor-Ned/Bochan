@@ -2,7 +2,7 @@
 #include "CodecUtil.h"
 #include "BochanEncoder.h"
 
-bochan::BochanEncoder::BochanEncoder(BufferPool* bufferPool) : bufferPool(bufferPool) {}
+bochan::BochanEncoder::BochanEncoder(BufferPool* bufferPool) : AudioEncoder(bufferPool) {}
 
 bochan::BochanEncoder::~BochanEncoder() {
     deinitialize();
@@ -16,6 +16,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     this->bochanCodec = bochanCodec;
     this->sampleRate = sampleRate;
     this->bitRate = bitRate;
+    this->sampleFormat = CodecUtil::getCodecSampleFormat(bochanCodec);
     codecId = CodecUtil::getCodecId(bochanCodec);
     if (codecId == AV_CODEC_ID_NONE) {
         BOCHAN_ERROR("Failed to get codec ID for codec '{}'!", bochanCodec);
@@ -36,10 +37,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    context->sample_fmt =
-        bochanCodec == BochanCodec::AAC
-        ? AVSampleFormat::AV_SAMPLE_FMT_FLTP
-        : CodecUtil::SAMPLE_FORMAT;
+    context->sample_fmt = sampleFormat;
     if (!CodecUtil::isFormatSupported(codec, context->sample_fmt)) {
         BOCHAN_ERROR("Format '{}' is not supported by codec '{}'!", context->sample_fmt, codec->long_name);
         deinitialize();
@@ -95,9 +93,10 @@ void bochan::BochanEncoder::deinitialize() {
     if (context) {
         avcodec_free_context(&context);
     }
+    sampleFormat = AVSampleFormat::AV_SAMPLE_FMT_NONE;
     bytesPerSample = 0;
     codec = nullptr;
-    codecId = AV_CODEC_ID_NONE;
+    codecId = AVCodecID::AV_CODEC_ID_NONE;
     bochanCodec = BochanCodec::None;
     sampleRate = 0;
     bitRate = 0ULL;
@@ -123,6 +122,10 @@ int bochan::BochanEncoder::getSamplesPerFrame() const {
     return initialized ? context->frame_size : 0;
 }
 
+int bochan::BochanEncoder::getInputBufferByteSize() const {
+    return initialized ? context->frame_size * sizeof(uint16_t) * context->channels : 0;
+}
+
 std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
@@ -131,13 +134,26 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         return {};
     }
     size_t expectedSamples = static_cast<size_t>(context->frame_size * context->channels);
-    size_t providedSamples = samples->getByteSize() / bytesPerSample;
+    size_t providedSamples = samples->getByteSize() / sizeof(uint16_t);
     if (providedSamples != expectedSamples) {
         BOCHAN_ERROR("Failed to encode audio frame! Expected {} samples, got {}.",
                      expectedSamples, providedSamples);
         return {};
     }
-    memcpy(frame->data[0], samples, samples->getByteSize());
+    switch (context->sample_fmt) {
+        case AVSampleFormat::AV_SAMPLE_FMT_S16:
+        {
+            memcpy(frame->data[0], samples, samples->getByteSize());
+            break;
+        }
+        case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
+        {
+            ByteBuffer* fltSamples = samplesToFloat(samples);
+            memcpy(frame->data[0], fltSamples, fltSamples->getByteSize());
+            bufferPool->freeBuffer(fltSamples);
+            break;
+        }
+    }
     if (int ret = avcodec_send_frame(context, frame); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);

@@ -15,8 +15,8 @@ namespace bochan {
         static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
         static int getHighestSupportedSampleRate(const AVCodec* codec);
         static AVCodecID getCodecId(const BochanCodec codec);
+        static AVSampleFormat getCodecSampleFormat(const BochanCodec codec);
         static const int STANDARD_SAMPLERATE = 44100;
-        static const AVSampleFormat SAMPLE_FORMAT = AVSampleFormat::AV_SAMPLE_FMT_S16;
         static const uint64_t CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO;
         static const int CHANNELS = 2;
     };

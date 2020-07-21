@@ -2,7 +2,7 @@
 #include "CodecUtil.h"
 #include "BochanDecoder.h"
 
-bochan::BochanDecoder::BochanDecoder(BufferPool* bufferPool) : bufferPool(bufferPool) {}
+bochan::BochanDecoder::BochanDecoder(BufferPool* bufferPool) : AudioDecoder(bufferPool) {}
 
 bochan::BochanDecoder::~BochanDecoder() {
     deinitialize();
@@ -16,6 +16,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     this->bochanCodec = bochanCodec;
     this->sampleRate = sampleRate;
     this->bitRate = bitRate;
+    this->sampleFormat = CodecUtil::getCodecSampleFormat(bochanCodec);
     codecId = CodecUtil::getCodecId(bochanCodec);
     if (codecId == AV_CODEC_ID_NONE) {
         BOCHAN_ERROR("Failed to get codec ID for codec '{}'!", bochanCodec);
@@ -36,10 +37,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    context->sample_fmt =
-        bochanCodec == BochanCodec::AAC
-        ? AVSampleFormat::AV_SAMPLE_FMT_FLTP
-        : CodecUtil::SAMPLE_FORMAT;
+    context->sample_fmt = sampleFormat;
     context->bit_rate = bitRate;
     context->sample_rate = sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
@@ -93,9 +91,10 @@ void bochan::BochanDecoder::deinitialize() {
     if (context) {
         avcodec_free_context(&context);
     }
+    sampleFormat = AVSampleFormat::AV_SAMPLE_FMT_NONE;
     bytesPerSample = 0;
     codec = nullptr;
-    codecId = AV_CODEC_ID_NONE;
+    codecId = AVCodecID::AV_CODEC_ID_NONE;
     bochanCodec = BochanCodec::None;
     sampleRate = 0;
     bitRate = 0ULL;
@@ -154,15 +153,32 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                 ByteBuffer* buff =
                     bufferPool->getBuffer(frame->nb_samples * bytesPerSample * context->channels);
                 uint8_t* buffPtr = buff->getPointer();
-                for (int i = 0; i < frame->nb_samples; ++i) {
-                    for (int j = 0; j < context->channels; ++j) {
-                        memcpy(buffPtr + (i * context->channels + j) * bytesPerSample, frame->data[j] + bytesPerSample * i, bytesPerSample);
+                if (frame->data[1] == nullptr) {
+                    memcpy(buffPtr, frame->data[0], buff->getByteSize());
+                } else {
+                    for (int i = 0; i < frame->nb_samples; ++i) {
+                        for (int j = 0; j < context->channels; ++j) {
+                            memcpy(buffPtr + (i * context->channels + j) * bytesPerSample, frame->data[j] + bytesPerSample * i, bytesPerSample);
+                        }
                     }
                 }
-                result.push_back(buff);
+                switch (context->sample_fmt) {
+                    case AVSampleFormat::AV_SAMPLE_FMT_S16:
+                    {
+                        result.push_back(buff);
+                        break;
+                    }
+                    case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
+                    {
+                        ByteBuffer* int16Buff = floatToSamples(buff);
+                        result.push_back(int16Buff);
+                        bufferPool->freeBuffer(buff);
+                        break;
+                    }
+                }
             }
         } else {
-            BOCHAN_WARN("Encountered an empty packet while decoding!");
+            BOCHAN_TRACE("Encountered an empty packet while decoding!");
         }
     }
     return result;

@@ -25,13 +25,13 @@ namespace bochan {
         int sampleRate{ 0 };
         unsigned long long bitRate{ 0ULL };
         int bytesPerSample{ 0 };
+        AVSampleFormat sampleFormat{ AVSampleFormat::AV_SAMPLE_FMT_NONE };
         AVCodecID codecId{};
         AVCodec* codec{ nullptr };
         AVCodecContext* context{ nullptr };
         AVCodecParserContext* parser{ nullptr };
         AVPacket* packet{ nullptr };
         AVFrame* frame{ nullptr };
-        BufferPool* bufferPool{ nullptr };
     };
 }
 
