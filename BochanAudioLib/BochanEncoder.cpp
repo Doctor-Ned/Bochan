@@ -140,18 +140,42 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
                      expectedSamples, providedSamples);
         return {};
     }
-    switch (context->sample_fmt) {
-        case AVSampleFormat::AV_SAMPLE_FMT_S16:
-        {
-            memcpy(frame->data[0], samples, samples->getByteSize());
-            break;
+    if (frame->data[1] == nullptr) {
+        switch (context->sample_fmt) {
+            case AVSampleFormat::AV_SAMPLE_FMT_S16:
+            {
+                memcpy(frame->data[0], samples, samples->getByteSize());
+                break;
+            }
+            case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
+            {
+                samplesToFloat(samples, reinterpret_cast<float*>(frame->data[0]));
+                break;
+            }
         }
-        case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
-        {
-            ByteBuffer* fltSamples = samplesToFloat(samples);
-            memcpy(frame->data[0], fltSamples, fltSamples->getByteSize());
-            bufferPool->freeBuffer(fltSamples);
-            break;
+    } else {
+        switch (context->sample_fmt) {
+            case AVSampleFormat::AV_SAMPLE_FMT_S16:
+            {
+                uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
+                for (int i = 0; i < frame->nb_samples; ++i) {
+                    for (int j = 0; j < context->channels; ++j) {
+                        reinterpret_cast<uint16_t*>(frame->data[j])[i] = uint16ptr[i * context->channels + j];
+                    }
+                }
+                memcpy(frame->data[0], samples, samples->getByteSize());
+                break;
+            }
+            case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
+            {
+                int16_t* int16ptr = reinterpret_cast<int16_t*>(samples->getPointer());
+                for (int i = 0; i < frame->nb_samples; ++i) {
+                    for (int j = 0; j < context->channels; ++j) {
+                        reinterpret_cast<float*>(frame->data[j])[i] = static_cast<float>(int16ptr[i * context->channels + j]) / 32768.0f;
+                    }
+                }
+                break;
+            }
         }
     }
     if (int ret = avcodec_send_frame(context, frame); ret < 0) {

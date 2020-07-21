@@ -11,9 +11,9 @@ using namespace bochan;
 int main() {
     BufferPool bufferPool(1024 * 1024 * 1024);
     BochanEncoder encoder(&bufferPool);
-    encoder.initialize(BochanCodec::AAC, 48000, 64000);
+    encoder.initialize(BochanCodec::Opus, 48000, 64000);
     BochanDecoder decoder(&bufferPool);
-    decoder.initialize(BochanCodec::AAC, 48000, 64000);
+    decoder.initialize(BochanCodec::Opus, 48000, 64000);
     ByteBuffer* buff = bufferPool.getBuffer(encoder.getInputBufferByteSize());
     double t = 0;
     double tincr = 2.0 * M_PI * 440.0 / 48000.0;
@@ -36,7 +36,7 @@ int main() {
             std::vector<ByteBuffer*> output = decoder.decode(inBuff);
             for (ByteBuffer* outBuff : output) {
                 for (int j = 0; j < outBuff->getSize() / 2; ++j) {
-                    //BOCHAN_WARN("{}", *reinterpret_cast<int16_t*>(outBuff->getPointer() + j * 2));
+                    BOCHAN_WARN("{}", *reinterpret_cast<int16_t*>(outBuff->getPointer() + j * 2));
                 }
                 outSize += outBuff->getByteSize();
                 outBuffs.push_back(outBuff);
