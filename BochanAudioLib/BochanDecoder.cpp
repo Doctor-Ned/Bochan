@@ -53,8 +53,8 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     if (extradata) {
         context->extradata_size = static_cast<int>(extradata->getSize());
         context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
+        memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
     }
-    memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
     bufferPool->freeAndRemoveBuffer(extradata);
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
@@ -142,7 +142,14 @@ unsigned long long bochan::BochanDecoder::getBitRate() const {
 }
 
 bool bochan::BochanDecoder::needsExtradata(BochanCodec bochanCodec) {
-    return bochanCodec == BochanCodec::Vorbis;
+    switch (bochanCodec) {
+        default:
+            return false;
+        case BochanCodec::Vorbis:
+            [[fallthrough]];
+        case BochanCodec::Opus:
+            return true;
+    }
 }
 
 std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* samples) {
