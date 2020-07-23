@@ -180,7 +180,8 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                 ret = avcodec_receive_frame(context, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
-                } else if (ret < 0) {
+                }
+                if (ret < 0) {
                     char err[ERROR_BUFF_SIZE] = { 0 };
                     av_strerror(ret, err, ERROR_BUFF_SIZE);
                     BOCHAN_ERROR("Failed to decode audio frame: {}", err);
@@ -189,7 +190,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                 ByteBuffer* buff =
                     bufferPool->getBuffer(frame->nb_samples * sizeof(uint16_t) * frame->channels);
                 uint8_t* buffPtr = buff->getPointer();
-                switch (context->sample_fmt) {
+                switch (frame->format) {
                     case AVSampleFormat::AV_SAMPLE_FMT_S16P:
                     {
                         uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(buffPtr);

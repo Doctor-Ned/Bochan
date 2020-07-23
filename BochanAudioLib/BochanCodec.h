@@ -5,7 +5,7 @@
 namespace bochan {
     enum class BOCHANAPI BochanCodec {
         None,
-        WAV,
+        MP2,
         FLAC,
         Vorbis,
         AAC,

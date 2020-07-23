@@ -154,7 +154,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
                      expectedSamples, providedSamples);
         return {};
     }
-    switch (context->sample_fmt) {
+    switch (frame->format) {
         case AVSampleFormat::AV_SAMPLE_FMT_S16P:
         {
             uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
