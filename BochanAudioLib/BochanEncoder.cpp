@@ -175,7 +175,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
             int16_t* int16ptr = reinterpret_cast<int16_t*>(samples->getPointer());
             for (int i = 0; i < frame->nb_samples; ++i) {
                 for (int j = 0; j < frame->channels; ++j) {
-                    reinterpret_cast<float*>(frame->data[j])[i] = static_cast<float>(int16ptr[i * frame->channels + j]) / 32768.0f;
+                    reinterpret_cast<float*>(frame->data[j])[i] = CodecUtil::int16ToFloat(int16ptr[i * frame->channels + j]);
                 }
             }
             break;
