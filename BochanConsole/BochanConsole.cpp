@@ -224,7 +224,7 @@ void avcodecEncode() {
     filename = "avcodec_encoded.dat";
 
     /* find the encoder */
-    codec = avcodec_find_encoder(AV_CODEC_ID_MP2);
+    codec = avcodec_find_encoder(AV_CODEC_ID_OPUS);
     if (!codec) {
         fprintf(stderr, "Codec not found\n");
         exit(1);
