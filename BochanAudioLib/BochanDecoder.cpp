@@ -37,7 +37,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    context->sample_fmt = sampleFormat;
+    context->request_sample_fmt = sampleFormat;
     context->bit_rate = bitRate;
     context->sample_rate = sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
@@ -49,6 +49,11 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
+    //if (context->sample_fmt != sampleFormat) {
+    //    BOCHAN_ERROR("Unable to apply requested sample format!");
+    //    deinitialize();
+    //    return false;
+    //}
     packet = av_packet_alloc();
     if (!packet) {
         BOCHAN_ERROR("Failed to allocate packet!");
@@ -125,12 +130,12 @@ bool bochan::BochanDecoder::needsExtradata() {
     return bochanCodec == BochanCodec::Opus;
 }
 
-void bochan::BochanDecoder::setExtradata(ByteBuffer* extradata) {
+bool bochan::BochanDecoder::setExtradata(ByteBuffer* extradata) {
     if (initialized) {
         if (context->extradata != nullptr) {
             if (context->extradata_size == extradata->getSize()) {
                 memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
-                return;
+                return true;
             } else {
                 av_free(context->extradata);
             }
@@ -138,7 +143,9 @@ void bochan::BochanDecoder::setExtradata(ByteBuffer* extradata) {
         context->extradata_size = extradata->getSize();
         context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
         memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
+        return true;
     }
+    return false;
 }
 
 std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* samples) {

@@ -24,9 +24,15 @@ void bochanEncodeDecode() {
     const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);
     BochanEncoder encoder(&bufferPool);
-    encoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE);
+    if (!encoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE)) {
+        BOCHAN_CRITICAL("Encoder initialization failed!");
+        return;
+    }
     BochanDecoder decoder(&bufferPool);
-    decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE);
+    if (!decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE)) {
+        BOCHAN_CRITICAL("Decoder initialization failed!");
+        return;
+    }
     if (encoder.hasExtradata()/* && decoder.needsExtradata()*/) {
         ByteBuffer* extradata = encoder.getExtradata();
         decoder.setExtradata(extradata);
@@ -36,8 +42,14 @@ void bochanEncodeDecode() {
     double t = 0;
     double tincr = 2.0 * M_PI * 440.0 / static_cast<double>(SAMPLE_RATE);
     FILE* outputFile, * inputFile;
-    fopen_s(&outputFile, "output.dat", "w");
-    fopen_s(&inputFile, "input.dat", "w");
+    if (fopen_s(&outputFile, "output.dat", "w")) {
+        BOCHAN_CRITICAL("Failed to open output file!");
+        return;
+    }
+    if (fopen_s(&inputFile, "input.dat", "w")) {
+        BOCHAN_CRITICAL("Failed to open input file!");
+        return;
+    }
     for (int i = 0; i < 200; ++i) {
         size_t buffPos = 0ULL;
         do {
