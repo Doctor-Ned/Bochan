@@ -49,7 +49,15 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
         case BochanCodec::AAC:
             return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
         case BochanCodec::FLAC:
+            return AVSampleFormat::AV_SAMPLE_FMT_S16;
         case BochanCodec::Opus:
             return AVSampleFormat::AV_SAMPLE_FMT_S16;
     }
+}
+
+void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {
+    BOCHAN_INFO("CONTEXT INFO: \n{} BPCS, {} BPRS, {} FS, {} channels (layout {})\nCodec: {}, {} extradata, {} sample_fmt, {} sample rate",
+                context->bits_per_coded_sample, context->bits_per_raw_sample, context->frame_size,
+                context->channels, context->channel_layout, context->codec_id, context->extradata_size,
+                context->sample_fmt, context->sample_rate);
 }

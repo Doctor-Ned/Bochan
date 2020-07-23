@@ -146,49 +146,65 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         BOCHAN_ERROR("Failed to ensure writable frame: {}", err);
         return {};
     }
-    size_t expectedSamples = static_cast<size_t>(context->frame_size * context->channels);
+    size_t expectedSamples = static_cast<size_t>(frame->nb_samples * frame->channels);
     size_t providedSamples = samples->getByteSize() / sizeof(uint16_t);
     if (providedSamples != expectedSamples) {
         BOCHAN_ERROR("Failed to encode audio frame! Expected {} samples, got {}.",
                      expectedSamples, providedSamples);
         return {};
     }
-    if (frame->data[1] == nullptr) {
-        switch (context->sample_fmt) {
-            case AVSampleFormat::AV_SAMPLE_FMT_S16:
-            {
-                memcpy(frame->data[0], samples, samples->getByteSize());
-                break;
-            }
-            case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
-            {
-                samplesToFloat(samples, reinterpret_cast<float*>(frame->data[0]));
-                break;
-            }
+    switch (context->sample_fmt) {
+        case AVSampleFormat::AV_SAMPLE_FMT_S16:
+        {
+            memcpy(frame->data[0], samples, samples->getByteSize());
+            break;
         }
-    } else {
-        switch (context->sample_fmt) {
-            case AVSampleFormat::AV_SAMPLE_FMT_S16:
-            {
-                uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
-                for (int i = 0; i < frame->nb_samples; ++i) {
-                    for (int j = 0; j < context->channels; ++j) {
-                        reinterpret_cast<uint16_t*>(frame->data[j])[i] = uint16ptr[i * context->channels + j];
-                    }
+        case AVSampleFormat::AV_SAMPLE_FMT_S16P:
+        {
+            uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
+            for (int i = 0; i < frame->channels; ++i) {
+                for (int j = 0; j < frame->nb_samples; ++j) {
+                    reinterpret_cast<uint16_t*>(frame->data[0])[i * frame->nb_samples + j] = uint16ptr[j * frame->channels + i];
                 }
-                memcpy(frame->data[0], samples, samples->getByteSize());
-                break;
             }
-            case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
-            {
-                int16_t* int16ptr = reinterpret_cast<int16_t*>(samples->getPointer());
-                for (int i = 0; i < frame->nb_samples; ++i) {
-                    for (int j = 0; j < context->channels; ++j) {
-                        reinterpret_cast<float*>(frame->data[j])[i] = static_cast<float>(int16ptr[i * context->channels + j]) / 32768.0f;
-                    }
+            break;
+        }
+        default:
+        {
+            BOCHAN_ERROR("Encountered unsupported decoder format {}!", context->sample_fmt);
+            return {};
+        }
+    }
+    switch (context->sample_fmt) {
+        case AVSampleFormat::AV_SAMPLE_FMT_S16P:
+        {
+            uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
+            for (int i = 0; i < frame->nb_samples; ++i) {
+                for (int j = 0; j < frame->channels; ++j) {
+                    reinterpret_cast<uint16_t*>(frame->data[j])[i] = uint16ptr[i * frame->channels + j];
                 }
-                break;
             }
+            break;
+        }
+        case AVSampleFormat::AV_SAMPLE_FMT_S16:
+        {
+            memcpy(frame->data[0], samples, samples->getByteSize());
+            break;
+        }
+        case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
+        {
+            int16_t* int16ptr = reinterpret_cast<int16_t*>(samples->getPointer());
+            for (int i = 0; i < frame->nb_samples; ++i) {
+                for (int j = 0; j < frame->channels; ++j) {
+                    reinterpret_cast<float*>(frame->data[j])[i] = static_cast<float>(int16ptr[i * frame->channels + j]) / 32768.0f;
+                }
+            }
+            break;
+        }
+        case AVSampleFormat::AV_SAMPLE_FMT_FLT:
+        {
+            int16ToFloat(samples, reinterpret_cast<float*>(frame->data[0]));
+            break;
         }
     }
     if (int ret = avcodec_send_frame(context, frame); ret < 0) {

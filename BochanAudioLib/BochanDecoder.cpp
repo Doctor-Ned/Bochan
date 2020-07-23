@@ -183,31 +183,47 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                     return {};
                 }
                 ByteBuffer* buff =
-                    bufferPool->getBuffer(frame->nb_samples * bytesPerSample * context->channels);
+                    bufferPool->getBuffer(frame->nb_samples * sizeof(uint16_t) * frame->channels);
                 uint8_t* buffPtr = buff->getPointer();
-                if (frame->data[1] == nullptr) {
-                    memcpy(buffPtr, frame->data[0], buff->getByteSize());
-                } else {
-                    for (int i = 0; i < frame->nb_samples; ++i) {
-                        for (int j = 0; j < context->channels; ++j) {
-                            memcpy(buffPtr + (i * context->channels + j) * bytesPerSample, frame->data[j] + bytesPerSample * i, bytesPerSample);
-                        }
-                    }
-                }
                 switch (context->sample_fmt) {
+                    case AVSampleFormat::AV_SAMPLE_FMT_S16P:
+                    {
+                        uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(buffPtr);
+                        for (int i = 0; i < frame->nb_samples; ++i) {
+                            for (int j = 0; j < frame->channels; ++j) {
+                                uint16ptr[i * frame->channels + j] = reinterpret_cast<uint16_t*>(frame->data[j])[i];
+                            }
+                        }
+                        break;
+                    }
                     case AVSampleFormat::AV_SAMPLE_FMT_S16:
                     {
-                        result.push_back(buff);
+                        memcpy(buffPtr, frame->data[0], buff->getByteSize());
                         break;
                     }
                     case AVSampleFormat::AV_SAMPLE_FMT_FLTP:
                     {
-                        ByteBuffer* int16Buff = floatToSamples(buff);
-                        result.push_back(int16Buff);
-                        bufferPool->freeBuffer(buff);
+                        int16_t* int16ptr = reinterpret_cast<int16_t*>(buffPtr);
+                        for (int i = 0; i < frame->nb_samples; ++i) {
+                            for (int j = 0; j < frame->channels; ++j) {
+                                int16ptr[i * frame->channels + j] = static_cast<int16_t>(reinterpret_cast<float*>(frame->data[j])[i] * 32767.9f);
+                            }
+                        }
                         break;
                     }
+                    case AVSampleFormat::AV_SAMPLE_FMT_FLT:
+                    {
+                        floatToInt16(reinterpret_cast<float*>(frame->data[0]), frame->nb_samples * frame->channels, reinterpret_cast<int16_t*>(buffPtr));
+                        break;
+                    }
+                    default:
+                    {
+                        BOCHAN_ERROR("Encountered unsupported decoder format {}!", context->sample_fmt);
+                        bufferPool->freeAndRemoveBuffer(buff);
+                        return {};
+                    }
                 }
+                result.push_back(buff);
             }
         } else {
             BOCHAN_TRACE("Encountered an empty packet while decoding!");

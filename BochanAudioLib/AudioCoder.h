@@ -15,10 +15,12 @@ namespace bochan {
         virtual int getSampleRate() const = 0;
         virtual unsigned long long getBitRate() const = 0;
     protected:
-        ByteBuffer* samplesToFloat(ByteBuffer* samples);
-        ByteBuffer* floatToSamples(ByteBuffer* fltp);
-        void samplesToFloat(ByteBuffer* from, float* to);
-        void floatToSamples(ByteBuffer* from, int16_t* to);
+        ByteBuffer* int16ToFloat(ByteBuffer* samples);
+        ByteBuffer* floatToInt16(ByteBuffer* fltp);
+        void int16ToFloat(ByteBuffer* from, float* to);
+        void floatToInt16(ByteBuffer* from, int16_t* to);
+        void int16ToFloat(int16_t* from, size_t count, float* to);
+        void floatToInt16(float* from, size_t count, int16_t* to);
         BufferPool* bufferPool{ nullptr };
     };
 }
