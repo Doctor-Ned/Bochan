@@ -55,6 +55,26 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
     }
 }
 
+void bochan::CodecUtil::int16ToFloat(ByteBuffer* from, float* to) {
+    int16ToFloat(reinterpret_cast<int16_t*>(from->getPointer()), from->getSize() / 2ULL, to);
+}
+
+void bochan::CodecUtil::floatToInt16(ByteBuffer* from, int16_t* to) {
+    floatToInt16(reinterpret_cast<float*>(from->getPointer()), from->getSize() / sizeof(float), to);
+}
+
+void bochan::CodecUtil::int16ToFloat(int16_t* from, size_t count, float* to) {
+    for (int i = 0; i < count; ++i) {
+        to[i] = static_cast<float>(static_cast<float>(from[i]) / 32768.0f);
+    }
+}
+
+void bochan::CodecUtil::floatToInt16(float* from, size_t count, int16_t* to) {
+    for (int i = 0; i < count; ++i) {
+        to[i] = static_cast<int16_t>(from[i] * 32767.9f);
+    }
+}
+
 void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {
     BOCHAN_INFO("CONTEXT INFO: \n{} BPCS, {} BPRS, {} FS, {} channels (layout {})\nCodec: {}, {} extradata, {} sample_fmt, {} sample rate",
                 context->bits_per_coded_sample, context->bits_per_raw_sample, context->frame_size,

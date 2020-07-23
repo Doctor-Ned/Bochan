@@ -76,6 +76,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         return false;
     }
     bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
+    CodecUtil::printDebugInfo(context);
     initialized = true;
     return true;
 }
@@ -213,7 +214,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                     }
                     case AVSampleFormat::AV_SAMPLE_FMT_FLT:
                     {
-                        floatToInt16(reinterpret_cast<float*>(frame->data[0]), frame->nb_samples * frame->channels, reinterpret_cast<int16_t*>(buffPtr));
+                        CodecUtil::floatToInt16(reinterpret_cast<float*>(frame->data[0]), frame->nb_samples * frame->channels, reinterpret_cast<int16_t*>(buffPtr));
                         break;
                     }
                     default:

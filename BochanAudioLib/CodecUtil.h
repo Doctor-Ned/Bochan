@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BochanCodec.h"
+#include "Buffer.h"
 
 extern "C" {
 #include <libavcodec\avcodec.h>
@@ -19,6 +20,10 @@ namespace bochan {
         static const int STANDARD_SAMPLERATE = 44100;
         static const uint64_t CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO;
         static const int CHANNELS = 2;
+        static void int16ToFloat(ByteBuffer* from, float* to);
+        static void floatToInt16(ByteBuffer* from, int16_t* to);
+        static void int16ToFloat(int16_t* from, size_t count, float* to);
+        static void floatToInt16(float* from, size_t count, int16_t* to);
         static void printDebugInfo(const AVCodecContext* context);
     };
 }

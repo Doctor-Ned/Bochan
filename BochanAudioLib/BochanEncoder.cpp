@@ -77,6 +77,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         return false;
     }
     bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
+    CodecUtil::printDebugInfo(context);
     initialized = true;
     return true;
 }
@@ -154,28 +155,6 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         return {};
     }
     switch (context->sample_fmt) {
-        case AVSampleFormat::AV_SAMPLE_FMT_S16:
-        {
-            memcpy(frame->data[0], samples, samples->getByteSize());
-            break;
-        }
-        case AVSampleFormat::AV_SAMPLE_FMT_S16P:
-        {
-            uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
-            for (int i = 0; i < frame->channels; ++i) {
-                for (int j = 0; j < frame->nb_samples; ++j) {
-                    reinterpret_cast<uint16_t*>(frame->data[0])[i * frame->nb_samples + j] = uint16ptr[j * frame->channels + i];
-                }
-            }
-            break;
-        }
-        default:
-        {
-            BOCHAN_ERROR("Encountered unsupported decoder format {}!", context->sample_fmt);
-            return {};
-        }
-    }
-    switch (context->sample_fmt) {
         case AVSampleFormat::AV_SAMPLE_FMT_S16P:
         {
             uint16_t* uint16ptr = reinterpret_cast<uint16_t*>(samples->getPointer());
@@ -203,8 +182,13 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         }
         case AVSampleFormat::AV_SAMPLE_FMT_FLT:
         {
-            int16ToFloat(samples, reinterpret_cast<float*>(frame->data[0]));
+            CodecUtil::int16ToFloat(samples, reinterpret_cast<float*>(frame->data[0]));
             break;
+        }
+        default:
+        {
+            BOCHAN_ERROR("Encountered unsupported decoder format {}!", context->sample_fmt);
+            return {};
         }
     }
     if (int ret = avcodec_send_frame(context, frame); ret < 0) {

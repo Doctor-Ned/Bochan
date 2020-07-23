@@ -17,10 +17,6 @@ namespace bochan {
     protected:
         ByteBuffer* int16ToFloat(ByteBuffer* samples);
         ByteBuffer* floatToInt16(ByteBuffer* fltp);
-        void int16ToFloat(ByteBuffer* from, float* to);
-        void floatToInt16(ByteBuffer* from, int16_t* to);
-        void int16ToFloat(int16_t* from, size_t count, float* to);
-        void floatToInt16(float* from, size_t count, int16_t* to);
         BufferPool* bufferPool{ nullptr };
     };
 }
