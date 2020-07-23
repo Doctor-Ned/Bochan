@@ -8,11 +8,19 @@ bochan::BochanDecoder::~BochanDecoder() {
     deinitialize();
 }
 
-bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) {
+bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate, ByteBuffer* extradata) {
     if (initialized) {
         deinitialize();
     }
     BOCHAN_TRACE("Initializing decoder with codec '{}', '{}' sample rate and '{}' bit rate...", bochanCodec, sampleRate, bitRate);
+    if (needsExtradata(bochanCodec)) {
+        if (extradata == nullptr) {
+            BOCHAN_ERROR("Extradata required but not provided!");
+            return false;
+        }
+    } else if (extradata != nullptr) {
+        BOCHAN_WARN("Extradata provided, but not marked as required.");
+    }
     this->bochanCodec = bochanCodec;
     this->sampleRate = sampleRate;
     this->bitRate = bitRate;
@@ -42,6 +50,12 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     context->sample_rate = sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
+    if (extradata) {
+        context->extradata_size = static_cast<int>(extradata->getSize());
+        context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
+    }
+    memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
+    bufferPool->freeAndRemoveBuffer(extradata);
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);
@@ -127,26 +141,8 @@ unsigned long long bochan::BochanDecoder::getBitRate() const {
     return bitRate;
 }
 
-bool bochan::BochanDecoder::needsExtradata() {
-    return bochanCodec == BochanCodec::Opus;
-}
-
-bool bochan::BochanDecoder::setExtradata(ByteBuffer* extradata) {
-    if (initialized) {
-        if (context->extradata != nullptr) {
-            if (context->extradata_size == extradata->getSize()) {
-                memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
-                return true;
-            } else {
-                av_free(context->extradata);
-            }
-        }
-        context->extradata_size = extradata->getSize();
-        context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
-        memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
-        return true;
-    }
-    return false;
+bool bochan::BochanDecoder::needsExtradata(BochanCodec bochanCodec) {
+    return bochanCodec == BochanCodec::Vorbis;
 }
 
 std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* samples) {
@@ -155,7 +151,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
     std::vector<bochan::ByteBuffer*> result;
     while (size) {
         int ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                                   ptr, size, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+                                   ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
         if (ret < 0) {
             char err[ERROR_BUFF_SIZE] = { 0 };
             av_strerror(ret, err, ERROR_BUFF_SIZE);
@@ -214,7 +210,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                     }
                     case AVSampleFormat::AV_SAMPLE_FMT_FLT:
                     {
-                        CodecUtil::floatToInt16(reinterpret_cast<float*>(frame->data[0]), frame->nb_samples * frame->channels, reinterpret_cast<int16_t*>(buffPtr));
+                        CodecUtil::floatToInt16(reinterpret_cast<float*>(frame->data[0]), static_cast<size_t>(frame->nb_samples) * frame->channels, reinterpret_cast<int16_t*>(buffPtr));
                         break;
                     }
                     default:

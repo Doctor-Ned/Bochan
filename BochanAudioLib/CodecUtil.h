@@ -25,8 +25,8 @@ namespace bochan {
         static void floatToInt16(ByteBuffer* from, int16_t* to);
         static void int16ToFloat(int16_t* from, size_t count, float* to);
         static void floatToInt16(float* from, size_t count, int16_t* to);
-        static inline float int16ToFloat(int16_t value);
-        static inline int16_t floatToInt16(float value);
+        static float int16ToFloat(int16_t value);
+        static int16_t floatToInt16(float value);
     };
 }
 

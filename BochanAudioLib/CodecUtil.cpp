@@ -35,6 +35,8 @@ AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
             return AVCodecID::AV_CODEC_ID_NONE;
         case BochanCodec::FLAC:
             return AVCodecID::AV_CODEC_ID_FLAC;
+        case BochanCodec::Vorbis:
+            return AVCodecID::AV_CODEC_ID_VORBIS;
         case BochanCodec::AAC:
             return AVCodecID::AV_CODEC_ID_AAC;
         case BochanCodec::Opus:
@@ -50,6 +52,8 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
             return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
         case BochanCodec::FLAC:
             return AVSampleFormat::AV_SAMPLE_FMT_S16;
+        case BochanCodec::Vorbis:
+            return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
         case BochanCodec::Opus:
             return AVSampleFormat::AV_SAMPLE_FMT_S16;
     }
@@ -82,10 +86,10 @@ void bochan::CodecUtil::floatToInt16(float* from, size_t count, int16_t* to) {
     }
 }
 
-inline float bochan::CodecUtil::int16ToFloat(int16_t value) {
+float bochan::CodecUtil::int16ToFloat(int16_t value) {
     return static_cast<float>(value) / 32768.0f;
 }
 
-inline int16_t bochan::CodecUtil::floatToInt16(float value) {
+int16_t bochan::CodecUtil::floatToInt16(float value) {
     return static_cast<int16_t>(value * 32767.9f);
 }

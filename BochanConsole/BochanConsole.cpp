@@ -19,7 +19,7 @@
 using namespace bochan;
 
 void bochanEncodeDecode() {
-    const BochanCodec CODEC = BochanCodec::Opus;
+    const BochanCodec CODEC = BochanCodec::Vorbis;
     const int SAMPLE_RATE = 48000;
     const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);
@@ -29,14 +29,9 @@ void bochanEncodeDecode() {
         return;
     }
     BochanDecoder decoder(&bufferPool);
-    if (!decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE)) {
+    if (!decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE, decoder.needsExtradata(CODEC) ? encoder.getExtradata() : nullptr)) {
         BOCHAN_CRITICAL("Decoder initialization failed!");
         return;
-    }
-    if (encoder.hasExtradata()/* && decoder.needsExtradata()*/) {
-        ByteBuffer* extradata = encoder.getExtradata();
-        decoder.setExtradata(extradata);
-        bufferPool.freeAndRemoveBuffer(extradata);
     }
     ByteBuffer* buff = bufferPool.getBuffer(encoder.getInputBufferByteSize());
     double t = 0;

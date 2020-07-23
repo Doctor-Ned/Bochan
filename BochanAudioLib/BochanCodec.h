@@ -7,6 +7,7 @@ namespace bochan {
         None,
         WAV,
         FLAC,
+        Vorbis,
         AAC,
         Opus
     };

@@ -12,14 +12,13 @@ namespace bochan {
     public:
         BochanDecoder(BufferPool * bufferPool);
         ~BochanDecoder();
-        bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) override;
+        bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate, ByteBuffer* extradata) override;
         void deinitialize() override;
         bool isInitialized() const override;
         BochanCodec getCodec() const override;
         int getSampleRate() const override;
         unsigned long long getBitRate() const override;
-        bool needsExtradata() override;
-        bool setExtradata(ByteBuffer* extradata) override;
+        bool needsExtradata(BochanCodec bochanCodec) override;
         std::vector<ByteBuffer*> decode(ByteBuffer* samples) override;
     private:
         bool initialized{ false };
