@@ -18,6 +18,8 @@ namespace bochan {
         BochanCodec getCodec() const override;
         int getSampleRate() const override;
         unsigned long long getBitRate() const override;
+        bool needsExtradata() override;
+        void setExtradata(ByteBuffer* extradata) override;
         std::vector<ByteBuffer*> decode(ByteBuffer* samples) override;
     private:
         bool initialized{ false };

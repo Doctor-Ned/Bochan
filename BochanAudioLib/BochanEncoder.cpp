@@ -126,6 +126,19 @@ int bochan::BochanEncoder::getInputBufferByteSize() const {
     return initialized ? context->frame_size * sizeof(uint16_t) * context->channels : 0;
 }
 
+bool bochan::BochanEncoder::hasExtradata() {
+    return initialized && context->extradata != nullptr;
+}
+
+bochan::ByteBuffer* bochan::BochanEncoder::getExtradata() {
+    if (!hasExtradata()) {
+        return nullptr;
+    }
+    ByteBuffer* result = bufferPool->getBuffer(context->extradata_size);
+    memcpy(result->getPointer(), context->extradata, context->extradata_size);
+    return result;
+}
+
 std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };

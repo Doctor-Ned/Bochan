@@ -89,6 +89,11 @@ void bochan::BochanDecoder::deinitialize() {
         av_packet_free(&packet);
     }
     if (context) {
+        if (context->extradata) {
+            av_free(context->extradata);
+            context->extradata = nullptr;
+            context->extradata_size = 0;
+        }
         avcodec_free_context(&context);
     }
     sampleFormat = AVSampleFormat::AV_SAMPLE_FMT_NONE;
@@ -114,6 +119,26 @@ int bochan::BochanDecoder::getSampleRate() const {
 
 unsigned long long bochan::BochanDecoder::getBitRate() const {
     return bitRate;
+}
+
+bool bochan::BochanDecoder::needsExtradata() {
+    return bochanCodec == BochanCodec::Opus;
+}
+
+void bochan::BochanDecoder::setExtradata(ByteBuffer* extradata) {
+    if (initialized) {
+        if (context->extradata != nullptr) {
+            if (context->extradata_size == extradata->getSize()) {
+                memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
+                return;
+            } else {
+                av_free(context->extradata);
+            }
+        }
+        context->extradata_size = extradata->getSize();
+        context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
+        memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
+    }
 }
 
 std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* samples) {

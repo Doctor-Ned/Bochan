@@ -19,6 +19,8 @@ namespace bochan {
         unsigned long long getBitRate() const override;
         int getSamplesPerFrame() const override;
         int getInputBufferByteSize() const override;
+        bool hasExtradata() override;
+        ByteBuffer* getExtradata() override;
         std::vector<ByteBuffer*> encode(ByteBuffer* samples) override;
     private:
         bool initialized{ false };

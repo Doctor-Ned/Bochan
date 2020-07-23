@@ -19,14 +19,22 @@
 using namespace bochan;
 
 void bochanEncodeDecode() {
+    const BochanCodec CODEC = BochanCodec::Opus;
+    const int SAMPLE_RATE = 48000;
+    const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);
     BochanEncoder encoder(&bufferPool);
-    encoder.initialize(BochanCodec::Opus, 48000, 64000);
+    encoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE);
     BochanDecoder decoder(&bufferPool);
-    decoder.initialize(BochanCodec::Opus, 48000, 64000);
+    decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE);
+    if (encoder.hasExtradata()/* && decoder.needsExtradata()*/) {
+        ByteBuffer* extradata = encoder.getExtradata();
+        decoder.setExtradata(extradata);
+        bufferPool.freeAndRemoveBuffer(extradata);
+    }
     ByteBuffer* buff = bufferPool.getBuffer(encoder.getInputBufferByteSize());
     double t = 0;
-    double tincr = 2.0 * M_PI * 440.0 / 48000.0;
+    double tincr = 2.0 * M_PI * 440.0 / static_cast<double>(SAMPLE_RATE);
     FILE* outputFile, * inputFile;
     fopen_s(&outputFile, "output.dat", "w");
     fopen_s(&inputFile, "input.dat", "w");
@@ -449,6 +457,7 @@ void avcodecEncodeDecodeTest() {
 }
 
 int main() {
-    avcodecEncodeDecodeTest();
+    //avcodecEncodeDecodeTest();
+    bochanEncodeDecode();
     return 0;
 }
