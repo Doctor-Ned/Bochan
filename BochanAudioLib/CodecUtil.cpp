@@ -24,8 +24,9 @@ int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
     int sampleRate = 0;
     const int* it = codec->supported_samplerates;
     while (*it) {
-        if (!sampleRate || abs(DEFAULT_SAMPLERATE - *it) < abs(DEFAULT_SAMPLERATE - sampleRate))
+        if (*it > sampleRate) {
             sampleRate = *it;
+        }
         ++it;
     }
     return sampleRate;
