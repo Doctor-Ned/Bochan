@@ -19,7 +19,7 @@
 using namespace bochan;
 
 void bochanEncodeDecode() {
-    const BochanCodec CODEC = BochanCodec::Vorbis;
+    const BochanCodec CODEC = BochanCodec::FLAC;
     const int SAMPLE_RATE = 48000;
     const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);
@@ -221,7 +221,7 @@ static void decode(AVCodecContext* dec_ctx, AVPacket* pkt, AVFrame* frame,
         }
         for (i = 0; i < frame->nb_samples; i++)
             for (ch = 0; ch < dec_ctx->channels; ch++)
-                fwrite(frame->data[ch] + data_size * i, 1, data_size, outfile);
+                fwrite(frame->data[ch] + static_cast<size_t>(data_size) * i, 1, data_size, outfile);
     }
 }
 

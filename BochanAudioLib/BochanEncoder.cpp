@@ -25,12 +25,18 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     }
     BOCHAN_TRACE("Using codec ID '{}'...", codecId);
     codec = avcodec_find_encoder(codecId);
+    CodecUtil::getHighestSupportedSampleRate(codec);
     if (!codec) {
         BOCHAN_ERROR("Failed to get encoder for codec ID '{}'!", codecId);
         deinitialize();
         return false;
     }
     BOCHAN_TRACE("Using encoder '{}'...", codec->long_name);
+    if (!CodecUtil::isSampleRateSupported(codec, sampleRate)) {
+        BOCHAN_ERROR("Sample rate {} is not supported by this codec!", sampleRate);
+        deinitialize();
+        return false;
+    }
     context = avcodec_alloc_context3(codec);
     if (!context) {
         BOCHAN_ERROR("Failed to allocate context!");

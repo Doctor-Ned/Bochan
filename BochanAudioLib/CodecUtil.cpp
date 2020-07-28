@@ -15,11 +15,10 @@ bool bochan::CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFo
 }
 
 int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
-    int sampleRate = 0;
-
     if (!codec->supported_samplerates)
         return STANDARD_SAMPLERATE;
 
+    int sampleRate = 0;
     const int* it = codec->supported_samplerates;
     while (*it) {
         if (!sampleRate || abs(STANDARD_SAMPLERATE - *it) < abs(STANDARD_SAMPLERATE - sampleRate))
@@ -27,6 +26,23 @@ int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
         ++it;
     }
     return sampleRate;
+}
+
+bool bochan::CodecUtil::isSampleRateSupported(const AVCodec* codec, int sampleRate) {
+    if (sampleRate <= 0) {
+        return false;
+    }
+    if (!codec->supported_samplerates) {
+        return true;
+    }
+    const int* it = codec->supported_samplerates;
+    while (*it) {
+        if (*it == sampleRate) {
+            return true;
+        }
+        ++it;
+    }
+    return false;
 }
 
 AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
@@ -59,7 +75,7 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
         case BochanCodec::AAC:
             return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
         case BochanCodec::Opus:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16;
+            return AVSampleFormat::AV_SAMPLE_FMT_FLT;
     }
 }
 

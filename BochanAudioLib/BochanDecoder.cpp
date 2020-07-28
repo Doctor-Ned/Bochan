@@ -38,6 +38,11 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
+    if (!CodecUtil::isSampleRateSupported(codec, sampleRate)) {
+        BOCHAN_ERROR("Sample rate {} is not supported by this codec!", sampleRate);
+        deinitialize();
+        return false;
+    }
     BOCHAN_TRACE("Using decoder '{}'...", codec->long_name);
     context = avcodec_alloc_context3(codec);
     if (!context) {

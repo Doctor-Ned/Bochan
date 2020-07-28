@@ -18,6 +18,7 @@ namespace bochan {
         CodecUtil() = delete;
         static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
         static int getHighestSupportedSampleRate(const AVCodec* codec);
+        static bool isSampleRateSupported(const AVCodec* codec, int sampleRate);
         static AVCodecID getCodecId(const BochanCodec codec);
         static AVSampleFormat getCodecSampleFormat(const BochanCodec codec);
         static void printDebugInfo(const AVCodecContext* context);
