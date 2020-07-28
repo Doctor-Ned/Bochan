@@ -61,7 +61,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
     if (extradata) {
-        context->extradata_size = static_cast<int>(extradata->getSize());
+        context->extradata_size = static_cast<int>(extradata->getUsedSize());
         context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
         memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
         bufferPool->freeAndRemoveBuffer(extradata);
@@ -167,7 +167,7 @@ bool bochan::BochanDecoder::needsExtradata(BochanCodec bochanCodec) {
 
 std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* samples) {
     uint8_t* ptr = samples->getPointer();
-    size_t size = samples->getByteSize();
+    size_t size = samples->getUsedSize();
     std::vector<bochan::ByteBuffer*> result;
     while (size) {
         int ret{};
@@ -223,7 +223,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                     }
                     case AVSampleFormat::AV_SAMPLE_FMT_S16:
                     {
-                        memcpy(buffPtr, frame->data[0], buff->getByteSize());
+                        memcpy(buffPtr, frame->data[0], buff->getUsedSize());
                         break;
                     }
                     case AVSampleFormat::AV_SAMPLE_FMT_FLTP:

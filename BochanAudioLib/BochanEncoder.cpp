@@ -151,7 +151,7 @@ bochan::ByteBuffer* bochan::BochanEncoder::getExtradata() {
 }
 
 std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
-    assert(samples->getByteSize() == getInputBufferByteSize());
+    assert(samples->getUsedSize() == getInputBufferByteSize());
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);
@@ -159,7 +159,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         return {};
     }
     size_t expectedSamples = static_cast<size_t>(frame->nb_samples * frame->channels);
-    size_t providedSamples = samples->getByteSize() / sizeof(uint16_t);
+    size_t providedSamples = samples->getUsedSize() / sizeof(uint16_t);
     if (providedSamples != expectedSamples) {
         BOCHAN_ERROR("Failed to encode audio frame! Expected {} samples, got {}.",
                      expectedSamples, providedSamples);
@@ -178,7 +178,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         }
         case AVSampleFormat::AV_SAMPLE_FMT_S16:
         {
-            memcpy(frame->data[0], samples, samples->getByteSize());
+            memcpy(frame->data[0], samples, samples->getUsedSize());
             break;
         }
         case AVSampleFormat::AV_SAMPLE_FMT_FLTP:

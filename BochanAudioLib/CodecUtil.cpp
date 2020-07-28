@@ -119,11 +119,11 @@ void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {
 }
 
 void bochan::CodecUtil::int16ToFloat(ByteBuffer* from, float* to) {
-    int16ToFloat(reinterpret_cast<int16_t*>(from->getPointer()), from->getSize() / 2ULL, to);
+    int16ToFloat(reinterpret_cast<int16_t*>(from->getPointer()), from->getUsedSize() / 2ULL, to);
 }
 
 void bochan::CodecUtil::floatToInt16(ByteBuffer* from, int16_t* to) {
-    floatToInt16(reinterpret_cast<float*>(from->getPointer()), from->getSize() / sizeof(float), to);
+    floatToInt16(reinterpret_cast<float*>(from->getPointer()), from->getUsedSize() / sizeof(float), to);
 }
 
 void bochan::CodecUtil::int16ToFloat(int16_t* from, size_t count, float* to) {

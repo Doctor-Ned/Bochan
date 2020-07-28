@@ -55,20 +55,20 @@ void bochanEncodeDecode() {
                 memcpy(buff->getPointer() + buffPos, &intVal, sizeof(int16_t));
                 buffPos += sizeof(int16_t);
             }
-        } while (buffPos < buff->getSize());
-        size_t inSize = buff->getSize(), midSize = 0ULL, outSize = 0ULL;
-        fwrite(buff->getPointer(), 1, buff->getByteSize(), inputFile);
+        } while (buffPos < buff->getUsedSize());
+        size_t inSize = buff->getUsedSize(), midSize = 0ULL, outSize = 0ULL;
+        fwrite(buff->getPointer(), 1, buff->getUsedSize(), inputFile);
         std::vector<ByteBuffer*> inBuffs, outBuffs;
         inBuffs = encoder.encode(buff);
         for (ByteBuffer* inBuff : inBuffs) {
-            midSize += inBuff->getByteSize();
+            midSize += inBuff->getUsedSize();
             std::vector<ByteBuffer*> output = decoder.decode(inBuff);
             for (ByteBuffer* outBuff : output) {
                 /*for (int j = 0; j < outBuff->getSize() / 2; ++j) {
                     BOCHAN_WARN("{}", *reinterpret_cast<int16_t*>(outBuff->getPointer() + j * 2));
                 }*/
-                fwrite(outBuff->getPointer(), 1, outBuff->getByteSize(), outputFile);
-                outSize += outBuff->getByteSize();
+                fwrite(outBuff->getPointer(), 1, outBuff->getUsedSize(), outputFile);
+                outSize += outBuff->getUsedSize();
                 outBuffs.push_back(outBuff);
             }
         }
