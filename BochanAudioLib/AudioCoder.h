@@ -17,5 +17,8 @@ namespace bochan {
         ByteBuffer* int16ToFloat(ByteBuffer* samples);
         ByteBuffer* floatToInt16(ByteBuffer* fltp);
         BufferPool* bufferPool{ nullptr };
+        BochanCodec bochanCodec{ BochanCodec::None };
+        int sampleRate{};
+        unsigned long long bitRate{};
     };
 }

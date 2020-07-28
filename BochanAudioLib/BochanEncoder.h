@@ -24,9 +24,6 @@ namespace bochan {
         std::vector<ByteBuffer*> encode(ByteBuffer* samples) override;
     private:
         bool initialized{ false };
-        BochanCodec bochanCodec{ BochanCodec::None };
-        int sampleRate{ 0 };
-        unsigned long long bitRate{ 0ULL };
         int bytesPerSample{0};
         AVSampleFormat sampleFormat{ AVSampleFormat::AV_SAMPLE_FMT_NONE };
         AVCodecID codecId{};

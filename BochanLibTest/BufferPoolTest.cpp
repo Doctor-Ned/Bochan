@@ -10,14 +10,14 @@ TEST(BufferPool, SizesProperlyAdjusted) {
     ASSERT_EQ(1024UL, pool.getUnallocatedSize());
     ASSERT_EQ(1024UL, pool.getMaxSize());
     ByteBuffer* buff1 = pool.getBuffer(10UL);
-    ASSERT_EQ(10UL, buff1->getSize());
+    ASSERT_EQ(10UL, buff1->getTotalByteSize());
     ASSERT_EQ(10UL, pool.getUsedSize());
     ASSERT_EQ(10UL, pool.getTotalSize());
     ASSERT_EQ(0UL, pool.getFreeSize());
     ASSERT_EQ(1014UL, pool.getUnallocatedSize());
     ASSERT_EQ(1024UL, pool.getMaxSize());
     ByteBuffer* buff2 = pool.getBuffer(15UL);
-    ASSERT_EQ(15UL, buff2->getSize());
+    ASSERT_EQ(15UL, buff2->getTotalByteSize());
     ASSERT_EQ(25UL, pool.getUsedSize());
     ASSERT_EQ(25UL, pool.getTotalSize());
     ASSERT_EQ(0UL, pool.getFreeSize());
