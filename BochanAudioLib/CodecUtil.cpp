@@ -5,6 +5,7 @@
 
 static void avLogCallback(void* ptr, int level, const char* szFmt, va_list varg) {
     va_list vl;
+    static const char* logFormat{ "[libav]{}" };
     char line[1024];
     static int printPrefix = 1;
     va_copy(vl, varg);
@@ -13,24 +14,24 @@ static void avLogCallback(void* ptr, int level, const char* szFmt, va_list varg)
 
     switch (level) {
         case AV_LOG_TRACE:
-            BOCHAN_TRACE("{}", line);
+            BOCHAN_TRACE(logFormat, line);
             break;
         case AV_LOG_DEBUG:
         case AV_LOG_VERBOSE:
-            BOCHAN_DEBUG("{}", line);
+            BOCHAN_DEBUG(logFormat, line);
             break;
         case AV_LOG_INFO:
-            BOCHAN_INFO("{}", line);
+            BOCHAN_INFO(logFormat, line);
             break;
         case AV_LOG_WARNING:
-            BOCHAN_WARN("{}", line);
+            BOCHAN_WARN(logFormat, line);
             break;
         case AV_LOG_ERROR:
-            BOCHAN_ERROR("{}", line);
+            BOCHAN_ERROR(logFormat, line);
             break;
         case AV_LOG_FATAL:
         case AV_LOG_PANIC:
-            BOCHAN_CRITICAL("{}", line);
+            BOCHAN_CRITICAL(logFormat, line);
             break;
     }
 }
