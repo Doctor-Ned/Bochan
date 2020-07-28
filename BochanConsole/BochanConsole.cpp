@@ -19,7 +19,7 @@
 using namespace bochan;
 
 void bochanEncodeDecode() {
-    const BochanCodec CODEC = BochanCodec::Opus;
+    const BochanCodec CODEC = BochanCodec::WAV;
     const int SAMPLE_RATE = 48000;
     const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);
@@ -80,6 +80,7 @@ void bochanEncodeDecode() {
             bufferPool.freeBuffer(out);
         }
     }
+    bufferPool.freeBuffer(buff);
     fclose(inputFile);
     fclose(outputFile);
 }

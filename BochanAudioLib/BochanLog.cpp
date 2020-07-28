@@ -16,6 +16,7 @@ spdlog::logger* bochan::BochanLog::getLogger() {
         auto rotatingFileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(BOCHAN_LOG_FILENAME, BOCHAN_LOG_FILE_SIZE, BOCHAN_LOG_MAX_FILES);
         spdlog::sinks_init_list sinkList{ consoleSink, rotatingFileSink };
         logger = std::make_shared<spdlog::logger>(BOCHAN_LOG_NAME, sinkList);
+        logger->set_level(static_cast<spdlog::level::level_enum>(BOCHAN_LOG_LEVEL));
         spdlog::set_default_logger(logger);
     }
     return logger.get();

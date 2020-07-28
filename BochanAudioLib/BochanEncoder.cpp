@@ -12,7 +12,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     if (initialized) {
         deinitialize();
     }
-    BOCHAN_TRACE("Initializing encoder with codec '{}', '{}' sample rate and '{}' bit rate...", bochanCodec, sampleRate, bitRate);
+    BOCHAN_DEBUG("Encoding with codec '{}' at {} SR, {} BPS...", bochanCodec, sampleRate, bitRate);
     this->bochanCodec = bochanCodec;
     this->sampleRate = sampleRate;
     this->bitRate = bitRate;
@@ -23,17 +23,21 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    BOCHAN_TRACE("Using codec ID '{}'...", codecId);
+    BOCHAN_DEBUG("Using codec ID '{}'...", codecId);
     codec = avcodec_find_encoder(codecId);
-    CodecUtil::getHighestSupportedSampleRate(codec);
     if (!codec) {
         BOCHAN_ERROR("Failed to get encoder for codec ID '{}'!", codecId);
         deinitialize();
         return false;
     }
-    BOCHAN_TRACE("Using encoder '{}'...", codec->long_name);
+    BOCHAN_DEBUG("Using encoder '{}'...", codec->long_name);
     if (!CodecUtil::isSampleRateSupported(codec, sampleRate)) {
         BOCHAN_ERROR("Sample rate {} is not supported by this codec!", sampleRate);
+        deinitialize();
+        return false;
+    }
+    if (!CodecUtil::isFormatSupported(codec, sampleFormat)) {
+        BOCHAN_ERROR("Format '{}' is not supported by this codec!", sampleFormat);
         deinitialize();
         return false;
     }
@@ -44,11 +48,6 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         return false;
     }
     context->sample_fmt = sampleFormat;
-    if (!CodecUtil::isFormatSupported(codec, context->sample_fmt)) {
-        BOCHAN_ERROR("Format '{}' is not supported by codec '{}'!", context->sample_fmt, codec->long_name);
-        deinitialize();
-        return false;
-    }
     context->bit_rate = bitRate;
     context->sample_rate = sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
@@ -59,6 +58,10 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         BOCHAN_ERROR("Failed to open codec: {}", err);
         deinitialize();
         return false;
+    }
+    if (!context->frame_size) {
+        context->frame_size = CodecUtil::DEFAULT_FRAMESIZE;
+        BOCHAN_DEBUG("Unrestricted frame size, setting to {}.", CodecUtil::DEFAULT_FRAMESIZE);
     }
     packet = av_packet_alloc();
     if (!packet) {
@@ -75,6 +78,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     frame->nb_samples = context->frame_size;
     frame->format = context->sample_fmt;
     frame->channel_layout = context->channel_layout;
+    frame->channels = context->channels;
     if (int ret = av_frame_get_buffer(frame, 0); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);
@@ -89,7 +93,7 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
 }
 
 void bochan::BochanEncoder::deinitialize() {
-    BOCHAN_TRACE("Deinitializing encoder...");
+    BOCHAN_DEBUG("Deinitializing encoder...");
     initialized = false;
     if (frame) {
         av_frame_free(&frame);
@@ -147,6 +151,7 @@ bochan::ByteBuffer* bochan::BochanEncoder::getExtradata() {
 }
 
 std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
+    assert(samples->getByteSize() == getInputBufferByteSize());
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);

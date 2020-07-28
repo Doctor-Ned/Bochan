@@ -12,12 +12,16 @@ extern "C" {
 namespace bochan {
     class BOCHANAPI CodecUtil sealed {
     public:
-        static const int STANDARD_SAMPLERATE = 44100;
+        static const int DEFAULT_SAMPLERATE = 44100;
+        static const AVSampleFormat DEFAULT_SAMPLEFORMAT = AVSampleFormat::AV_SAMPLE_FMT_FLTP;
+        static const int DEFAULT_FRAMESIZE = 4096;
         static const uint64_t CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO;
         static const int CHANNELS = 2;
         CodecUtil() = delete;
         static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
         static int getHighestSupportedSampleRate(const AVCodec* codec);
+        static std::vector<AVSampleFormat> getSupportedSampleFormats(const AVCodec* codec);
+        static std::vector<int> getSupportedSampleRates(const AVCodec* codec);
         static bool isSampleRateSupported(const AVCodec* codec, int sampleRate);
         static AVCodecID getCodecId(const BochanCodec codec);
         static AVSampleFormat getCodecSampleFormat(const BochanCodec codec);

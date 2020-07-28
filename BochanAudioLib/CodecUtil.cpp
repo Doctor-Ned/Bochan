@@ -4,6 +4,9 @@
 #include <stdexcept>
 
 bool bochan::CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFormat format) {
+    if (!codec->sample_fmts) {
+        return DEFAULT_SAMPLEFORMAT;
+    }
     const enum AVSampleFormat* it = codec->sample_fmts;
     while (*it != AV_SAMPLE_FMT_NONE) {
         if (format == *it) {
@@ -16,16 +19,43 @@ bool bochan::CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFo
 
 int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
     if (!codec->supported_samplerates)
-        return STANDARD_SAMPLERATE;
+        return DEFAULT_SAMPLERATE;
 
     int sampleRate = 0;
     const int* it = codec->supported_samplerates;
     while (*it) {
-        if (!sampleRate || abs(STANDARD_SAMPLERATE - *it) < abs(STANDARD_SAMPLERATE - sampleRate))
+        if (!sampleRate || abs(DEFAULT_SAMPLERATE - *it) < abs(DEFAULT_SAMPLERATE - sampleRate))
             sampleRate = *it;
         ++it;
     }
     return sampleRate;
+}
+
+std::vector<AVSampleFormat> bochan::CodecUtil::getSupportedSampleFormats(const AVCodec* codec) {
+    if (!codec->sample_fmts) {
+        return {};
+    }
+    const enum AVSampleFormat* it = codec->sample_fmts;
+    std::vector<AVSampleFormat> result;
+    while (*it != AV_SAMPLE_FMT_NONE) {
+        result.push_back(*it);
+        ++it;
+    }
+    return result;
+}
+
+std::vector<int> bochan::CodecUtil::getSupportedSampleRates(const AVCodec* codec) {
+    if (!codec->supported_samplerates)
+        return {};
+
+    int sampleRate = 0;
+    const int* it = codec->supported_samplerates;
+    std::vector<int> result;
+    while (*it) {
+        result.push_back(*it);
+        ++it;
+    }
+    return result;
 }
 
 bool bochan::CodecUtil::isSampleRateSupported(const AVCodec* codec, int sampleRate) {
@@ -49,8 +79,8 @@ AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
     switch (codec) {
         default:
             return AVCodecID::AV_CODEC_ID_NONE;
-        case BochanCodec::MP2:
-            return AVCodecID::AV_CODEC_ID_MP2;
+        case BochanCodec::WAV:
+            return AVCodecID::AV_CODEC_ID_PCM_S16LE;
         case BochanCodec::FLAC:
             return AVCodecID::AV_CODEC_ID_FLAC;
         case BochanCodec::Vorbis:
@@ -66,7 +96,7 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
     switch (codec) {
         default:
             return AVSampleFormat::AV_SAMPLE_FMT_NONE;
-        case BochanCodec::MP2:
+        case BochanCodec::WAV:
             return AVSampleFormat::AV_SAMPLE_FMT_S16;
         case BochanCodec::FLAC:
             return AVSampleFormat::AV_SAMPLE_FMT_S16;
@@ -80,9 +110,11 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
 }
 
 void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {
-    BOCHAN_INFO("CONTEXT INFO: \n{} BPCS, {} BPRS, {} FS, {} channels (layout {})\nCodec: {}, {} extradata, {} sample_fmt, {} sample rate",
+    BOCHAN_INFO("CONTEXT INFO:");
+    BOCHAN_INFO("{} BPCS, {} BPRS, {} FS, {} channels (layout {})",
                 context->bits_per_coded_sample, context->bits_per_raw_sample, context->frame_size,
-                context->channels, context->channel_layout, context->codec_id, context->extradata_size,
+                context->channels, context->channel_layout);
+    BOCHAN_INFO("Codec: {}, {} extradata, format {}, {} sample rate", context->codec_id, context->extradata_size,
                 context->sample_fmt, context->sample_rate);
 }
 

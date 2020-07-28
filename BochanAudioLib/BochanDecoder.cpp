@@ -12,7 +12,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     if (initialized) {
         deinitialize();
     }
-    BOCHAN_TRACE("Initializing decoder with codec '{}', '{}' sample rate and '{}' bit rate...", bochanCodec, sampleRate, bitRate);
+    BOCHAN_DEBUG("Decoding with codec '{}' at {} SR, {} BPS...", bochanCodec, sampleRate, bitRate);
     if (needsExtradata(bochanCodec)) {
         if (extradata == nullptr) {
             BOCHAN_ERROR("Extradata required but not provided!");
@@ -31,19 +31,24 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    BOCHAN_TRACE("Using codec ID '{}'...", codecId);
+    BOCHAN_DEBUG("Using codec ID '{}'...", codecId);
     codec = avcodec_find_decoder(codecId);
     if (!codec) {
         BOCHAN_ERROR("Failed to get decoder for codec ID '{}'!", codecId);
         deinitialize();
         return false;
     }
+    BOCHAN_DEBUG("Using decoder '{}'...", codec->long_name);
     if (!CodecUtil::isSampleRateSupported(codec, sampleRate)) {
         BOCHAN_ERROR("Sample rate {} is not supported by this codec!", sampleRate);
         deinitialize();
         return false;
     }
-    BOCHAN_TRACE("Using decoder '{}'...", codec->long_name);
+    if (!CodecUtil::isFormatSupported(codec, sampleFormat)) {
+        BOCHAN_ERROR("Format '{}' is not supported by this codec!", sampleFormat);
+        deinitialize();
+        return false;
+    }
     context = avcodec_alloc_context3(codec);
     if (!context) {
         BOCHAN_ERROR("Failed to allocate context!");
@@ -59,8 +64,8 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         context->extradata_size = static_cast<int>(extradata->getSize());
         context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
         memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
+        bufferPool->freeAndRemoveBuffer(extradata);
     }
-    bufferPool->freeAndRemoveBuffer(extradata);
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
         av_strerror(ret, err, ERROR_BUFF_SIZE);
@@ -88,11 +93,14 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     frame->nb_samples = context->frame_size;
     frame->format = context->sample_fmt;
     frame->channel_layout = context->channel_layout;
-    parser = av_parser_init(codec->id);
-    if (!parser) {
-        BOCHAN_ERROR("Parser not found!");
-        deinitialize();
-        return false;
+    frame->channels = context->channels;
+    if (bochanCodec != BochanCodec::WAV) {
+        parser = av_parser_init(codec->id);
+        if (!parser) {
+            BOCHAN_ERROR("Parser not found!");
+            deinitialize();
+            return false;
+        }
     }
     bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
     CodecUtil::printDebugInfo(context);
@@ -101,7 +109,7 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
 }
 
 void bochan::BochanDecoder::deinitialize() {
-    BOCHAN_TRACE("Deinitializing decoder...");
+    BOCHAN_DEBUG("Deinitializing decoder...");
     initialized = false;
     if (parser) {
         av_parser_close(parser);
@@ -162,14 +170,21 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
     size_t size = samples->getByteSize();
     std::vector<bochan::ByteBuffer*> result;
     while (size) {
-        int ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                                   ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-        if (ret < 0) {
-            char err[ERROR_BUFF_SIZE] = { 0 };
-            av_strerror(ret, err, ERROR_BUFF_SIZE);
-            BOCHAN_ERROR("Failed to parse data: {}", err);
-            //return {};
-            break;
+        int ret{};
+        if (bochanCodec == BochanCodec::WAV) {
+            ret = size;
+            packet->data = ptr;
+            packet->size = size;
+        } else {
+            int ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
+                                       ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+            if (ret < 0) {
+                char err[ERROR_BUFF_SIZE] = { 0 };
+                av_strerror(ret, err, ERROR_BUFF_SIZE);
+                BOCHAN_ERROR("Failed to parse data: {}", err);
+                //return {};
+                break;
+            }
         }
         ptr += ret;
         size -= ret;
@@ -236,7 +251,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                 result.push_back(buff);
             }
         } else {
-            BOCHAN_TRACE("Encountered an empty packet while decoding!");
+            BOCHAN_DEBUG("Encountered an empty packet while decoding!");
         }
     }
     return result;
