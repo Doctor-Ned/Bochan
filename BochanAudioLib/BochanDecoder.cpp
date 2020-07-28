@@ -176,8 +176,8 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
             packet->data = ptr;
             packet->size = size;
         } else {
-            int ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                                       ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+            ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
+                                   ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
             if (ret < 0) {
                 char err[ERROR_BUFF_SIZE] = { 0 };
                 av_strerror(ret, err, ERROR_BUFF_SIZE);
