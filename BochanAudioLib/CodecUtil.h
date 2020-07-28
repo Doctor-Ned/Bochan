@@ -18,6 +18,7 @@ namespace bochan {
         static const uint64_t CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO;
         static const int CHANNELS = 2;
         CodecUtil() = delete;
+        static void initialiseAvLog();
         static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
         static int getHighestSupportedSampleRate(const AVCodec* codec);
         static std::vector<AVSampleFormat> getSupportedSampleFormats(const AVCodec* codec);
