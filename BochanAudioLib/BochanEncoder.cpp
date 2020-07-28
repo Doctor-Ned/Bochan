@@ -217,6 +217,11 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
             char err[ERROR_BUFF_SIZE] = { 0 };
             av_strerror(ret, err, ERROR_BUFF_SIZE);
             BOCHAN_ERROR("Failed to encode audio frame: {}", err);
+            for (ByteBuffer* buff : result) {
+                if (!bufferPool->freeAndRemoveBuffer(buff)) {
+                    BOCHAN_WARN("Failed to free and remove the sample buffer!");
+                }
+            }
             return {};
         }
         ByteBuffer* buff = bufferPool->getBuffer(packet->size);

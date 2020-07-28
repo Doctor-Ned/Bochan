@@ -20,7 +20,7 @@ using namespace bochan;
 
 void bochanEncodeDecode() {
     CodecUtil::initialiseAvLog();
-    const BochanCodec CODEC = BochanCodec::Opus;
+    const BochanCodec CODEC = BochanCodec::AAC;
     const int SAMPLE_RATE = 48000;
     const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);
@@ -75,13 +75,19 @@ void bochanEncodeDecode() {
         }
         BOCHAN_INFO("In: {} | Mid: {} | Out: {}", inSize, midSize, outSize);
         for (ByteBuffer* in : inBuffs) {
-            bufferPool.freeBuffer(in);
+            if (!bufferPool.freeBuffer(in)) {
+                BOCHAN_WARN("Couldn't free an input buffer!");
+            }
         }
         for (ByteBuffer* out : outBuffs) {
-            bufferPool.freeBuffer(out);
+            if (!bufferPool.freeBuffer(out)) {
+                BOCHAN_WARN("Couldn't free an output buffer!");
+            }
         }
     }
-    bufferPool.freeBuffer(buff);
+    if (!bufferPool.freeBuffer(buff)) {
+        BOCHAN_WARN("Couldn't free the sample buffer!");
+    }
     fclose(inputFile);
     fclose(outputFile);
 }

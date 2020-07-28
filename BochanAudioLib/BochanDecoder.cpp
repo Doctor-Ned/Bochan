@@ -64,7 +64,9 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         context->extradata_size = static_cast<int>(extradata->getUsedSize());
         context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
         memcpy(context->extradata, extradata->getPointer(), context->extradata_size);
-        bufferPool->freeAndRemoveBuffer(extradata);
+        if (!bufferPool->freeAndRemoveBuffer(extradata)) {
+            BOCHAN_WARN("Failed to free and remove the extradata buffer!");
+        }
     }
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
         char err[ERROR_BUFF_SIZE] = { 0 };
@@ -205,11 +207,17 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                     char err[ERROR_BUFF_SIZE] = { 0 };
                     av_strerror(ret, err, ERROR_BUFF_SIZE);
                     BOCHAN_ERROR("Failed to decode audio frame: {}", err);
+                    for (ByteBuffer* buff : result) {
+                        if (!bufferPool->freeAndRemoveBuffer(buff)) {
+                            BOCHAN_WARN("Failed to free and remove the sample buffer!");
+                        }
+                    }
                     return {};
                 }
                 ByteBuffer* buff =
                     bufferPool->getBuffer(frame->nb_samples * sizeof(uint16_t) * frame->channels);
                 uint8_t* buffPtr = buff->getPointer();
+                result.push_back(buff);
                 switch (frame->format) {
                     case AVSampleFormat::AV_SAMPLE_FMT_S16P:
                     {
@@ -244,11 +252,14 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
                     default:
                     {
                         BOCHAN_ERROR("Encountered unsupported decoder format {}!", context->sample_fmt);
-                        bufferPool->freeAndRemoveBuffer(buff);
+                        for (ByteBuffer* buff : result) {
+                            if (!bufferPool->freeAndRemoveBuffer(buff)) {
+                                BOCHAN_WARN("Failed to free and remove the sample buffer!");
+                            }
+                        }
                         return {};
                     }
                 }
-                result.push_back(buff);
             }
         } else {
             BOCHAN_DEBUG("Encountered an empty packet while decoding!");
