@@ -68,11 +68,11 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    //if (context->sample_fmt != sampleFormat) {
-    //    BOCHAN_ERROR("Unable to apply requested sample format!");
-    //    deinitialize();
-    //    return false;
-    //}
+    if (context->sample_fmt != sampleFormat) {
+        BOCHAN_ERROR("Unable to apply requested sample format!");
+        deinitialize();
+        return false;
+    }
     packet = av_packet_alloc();
     if (!packet) {
         BOCHAN_ERROR("Failed to allocate packet!");
