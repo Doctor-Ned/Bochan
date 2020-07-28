@@ -100,7 +100,7 @@ bochan::ByteBuffer* bochan::BufferPool::addBuffer(size_t size, bool setFree) {
     std::lock_guard lock(mutex);
     if (byteSize + size <= maxSize) {
         ByteBuffer* buff = new ByteBuffer(size);
-        BOCHAN_DEBUG("Adding new buffer {:x} of size {} ({})", reinterpret_cast<uintptr_t>(buff), size, setFree);
+        BOCHAN_TRACE("Adding new buffer {:x} of size {} ({})", reinterpret_cast<uintptr_t>(buff), size, setFree);
         byteSize += size;
         if (setFree) {
             addToFreeBuffers(buff);
@@ -127,7 +127,7 @@ void bochan::BufferPool::addToFreeBuffers(ByteBuffer* buffer) {
 
 bool bochan::BufferPool::deleteBuffer(ByteBuffer* buffer, bool checkIfFree) {
     std::lock_guard lock(mutex);
-    BOCHAN_DEBUG("Deleting buffer {:x} of size {} ({})", reinterpret_cast<uintptr_t>(buffer), buffer->getTotalByteSize(), checkIfFree);
+    BOCHAN_TRACE("Deleting buffer {:x} of size {} ({})", reinterpret_cast<uintptr_t>(buffer), buffer->getTotalByteSize(), checkIfFree);
     if (checkIfFree) {
         std::vector<bochan::ByteBuffer*>::iterator it = std::find(freeBuffers.begin(), freeBuffers.end(), buffer);
         if (it == freeBuffers.end()) {
