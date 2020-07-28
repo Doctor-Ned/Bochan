@@ -140,14 +140,8 @@ AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
     switch (codec) {
         default:
             return AVCodecID::AV_CODEC_ID_NONE;
-        case BochanCodec::WAV:
-            return AVCodecID::AV_CODEC_ID_PCM_S16LE;
-        case BochanCodec::FLAC:
-            return AVCodecID::AV_CODEC_ID_FLAC;
         case BochanCodec::Vorbis:
             return AVCodecID::AV_CODEC_ID_VORBIS;
-        case BochanCodec::AAC:
-            return AVCodecID::AV_CODEC_ID_AAC;
         case BochanCodec::Opus:
             return AVCodecID::AV_CODEC_ID_OPUS;
     }
@@ -157,13 +151,7 @@ AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) 
     switch (codec) {
         default:
             return AVSampleFormat::AV_SAMPLE_FMT_NONE;
-        case BochanCodec::WAV:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16;
-        case BochanCodec::FLAC:
-            return AVSampleFormat::AV_SAMPLE_FMT_S16;
         case BochanCodec::Vorbis:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
-        case BochanCodec::AAC:
             return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
         case BochanCodec::Opus:
             return AVSampleFormat::AV_SAMPLE_FMT_FLT;

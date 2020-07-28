@@ -20,7 +20,7 @@ using namespace bochan;
 
 void bochanEncodeDecode() {
     CodecUtil::initialiseAvLog();
-    const BochanCodec CODEC = BochanCodec::AAC;
+    const BochanCodec CODEC = BochanCodec::Opus;
     const int SAMPLE_RATE = 48000;
     const unsigned long long BIT_RATE = 64000;
     BufferPool bufferPool(1024 * 1024 * 1024);

@@ -96,13 +96,11 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     frame->format = context->sample_fmt;
     frame->channel_layout = context->channel_layout;
     frame->channels = context->channels;
-    if (bochanCodec != BochanCodec::WAV) {
-        parser = av_parser_init(codec->id);
-        if (!parser) {
-            BOCHAN_ERROR("Parser not found!");
-            deinitialize();
-            return false;
-        }
+    parser = av_parser_init(codec->id);
+    if (!parser) {
+        BOCHAN_ERROR("Parser not found!");
+        deinitialize();
+        return false;
     }
     bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
     CodecUtil::printDebugInfo(context);
@@ -173,20 +171,14 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
     std::vector<bochan::ByteBuffer*> result;
     while (size) {
         int ret{};
-        if (bochanCodec == BochanCodec::WAV) {
-            ret = size;
-            packet->data = ptr;
-            packet->size = size;
-        } else {
-            ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                                   ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-            if (ret < 0) {
-                char err[ERROR_BUFF_SIZE] = { 0 };
-                av_strerror(ret, err, ERROR_BUFF_SIZE);
-                BOCHAN_ERROR("Failed to parse data: {}", err);
-                //return {};
-                break;
-            }
+        ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
+                               ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+        if (ret < 0) {
+            char err[ERROR_BUFF_SIZE] = { 0 };
+            av_strerror(ret, err, ERROR_BUFF_SIZE);
+            BOCHAN_ERROR("Failed to parse data: {}", err);
+            //return {};
+            break;
         }
         ptr += ret;
         size -= ret;
