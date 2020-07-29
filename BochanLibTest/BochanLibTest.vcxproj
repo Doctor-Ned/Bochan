@@ -28,6 +28,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BochanThreadTest.cpp" />
     <ClCompile Include="BufferPoolTest.cpp" />
     <ClCompile Include="CodecUtilTest.cpp" />
     <ClCompile Include="pch.cpp">

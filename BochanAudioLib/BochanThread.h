@@ -5,7 +5,7 @@ namespace bochan {
     class BochanThread sealed : public Thread {
     public:
         BOCHANAPI ~BochanThread();
-        BOCHANAPI bool run(ThreadFunc func) override;
+        BOCHANAPI bool run(ThreadFunc func, void* ptr) override;
         BOCHANAPI bool isRunning() override;
         BOCHANAPI void interrupt() override;
         BOCHANAPI bool isInterrupted() override;

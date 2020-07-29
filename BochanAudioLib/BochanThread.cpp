@@ -15,7 +15,7 @@ bochan::BochanThread::~BochanThread() {
     }
 }
 
-bool bochan::BochanThread::run(ThreadFunc func) {
+bool bochan::BochanThread::run(ThreadFunc func, void* ptr) {
     std::lock_guard lock(mutex);
     if (running) {
         BOCHAN_WARN("Attempted to invoke run on a thread that is already running!");
@@ -24,6 +24,10 @@ bool bochan::BochanThread::run(ThreadFunc func) {
     running = true;
     interrupted = false;
     this->threadFunc = func;
+    this->ptr = ptr;
+    if (threadHandle) {
+        closeThreadHandle();
+    }
     threadHandle = CreateThread(nullptr, 0ULL, threadProc, this, 0UL, nullptr);
     if (!threadHandle) {
         BOCHAN_ERROR("Failed to create a thread ({})!", GetLastError());
@@ -59,6 +63,7 @@ bool bochan::BochanThread::isInterrupted() {
 bool bochan::BochanThread::join() {
     std::lock_guard lock(mutex);
     if (!running) {
+        closeThreadHandle();
         return true;
     }
     interrupt();
@@ -102,10 +107,12 @@ BOCHANAPI DWORD bochan::BochanThread::getThreadId() {
 }
 
 void bochan::BochanThread::closeThreadHandle() {
-    if (!CloseHandle(threadHandle)) {
-        BOCHAN_WARN("Failed to close the thread handle!");
-    } else {
-        threadHandle = nullptr;
+    if (threadHandle) {
+        if (!CloseHandle(threadHandle)) {
+            BOCHAN_WARN("Failed to close the thread handle!");
+        } else {
+            threadHandle = nullptr;
+        }
     }
 }
 
@@ -113,7 +120,7 @@ DWORD WINAPI bochan::BochanThread::threadProc(LPVOID param) {
     Thread* thread = reinterpret_cast<Thread*>(param);
     ThreadFunc threadFunc = thread->getThreadFunc();
     if (threadFunc) {
-        threadFunc(thread);
+        threadFunc(thread, thread->getPtr());
     } else {
         BOCHAN_WARN("An empty thread has been started!");
     }
