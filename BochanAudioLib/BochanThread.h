@@ -1,6 +1,9 @@
 #pragma once
 #include "Thread.h"
 
+#define THREAD_RESULT_SUCCESS 0UL
+#define THREAD_RESULT_TERMINATED 1UL
+
 namespace bochan {
     class BochanThread sealed : public Thread {
     public:

@@ -44,8 +44,17 @@ bool bochan::BochanThread::isRunning() {
             BOCHAN_WARN("Failed to check thread exit code ({})!", GetLastError());
             return true;
         }
-        if (exitCode == STILL_ACTIVE) {
-            return true;
+        switch (exitCode) {
+            case STILL_ACTIVE:
+                return true;
+            case THREAD_RESULT_TERMINATED:
+                BOCHAN_WARN("Detected thread termination exit code!");
+                break;
+            case THREAD_RESULT_SUCCESS:
+                break;
+            default:
+                BOCHAN_WARN("Unrecognized thread exit code {}!", exitCode);
+                break;
         }
         running = false;
     }
@@ -124,5 +133,5 @@ DWORD WINAPI bochan::BochanThread::threadProc(LPVOID param) {
     } else {
         BOCHAN_WARN("An empty thread has been started!");
     }
-    return 0UL;
+    return THREAD_RESULT_SUCCESS;
 }
