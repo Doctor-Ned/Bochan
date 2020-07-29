@@ -54,6 +54,12 @@
     <ClInclude Include="BochanDecoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BochanThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -84,6 +90,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AudioEncoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BochanThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
