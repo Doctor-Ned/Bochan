@@ -66,7 +66,7 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalOptions>
       </AdditionalOptions>
-      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -90,7 +90,7 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalOptions>
       </AdditionalOptions>
-      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -102,13 +102,19 @@
     <ClInclude Include="BochanDecoder.h" />
     <ClInclude Include="BochanEncoder.h" />
     <ClInclude Include="BochanLog.h" />
+    <ClInclude Include="BochanTCPClient.h" />
+    <ClInclude Include="BochanTCPServer.h" />
     <ClInclude Include="BochanThread.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="BufferPool.h" />
     <ClInclude Include="CodecUtil.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="TCPServer.h" />
+    <ClInclude Include="TCPSocket.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="WinsockUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioCoder.cpp" />
@@ -117,6 +123,8 @@
     <ClCompile Include="BochanDecoder.cpp" />
     <ClCompile Include="BochanEncoder.cpp" />
     <ClCompile Include="BochanLog.cpp" />
+    <ClCompile Include="BochanTCPClient.cpp" />
+    <ClCompile Include="BochanTCPServer.cpp" />
     <ClCompile Include="BochanThread.cpp" />
     <ClCompile Include="BufferPool.cpp" />
     <ClCompile Include="CodecUtil.cpp" />
@@ -125,7 +133,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TCPClient.cpp" />
+    <ClCompile Include="TCPServer.cpp" />
+    <ClCompile Include="TCPSocket.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="WinsockUtil.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

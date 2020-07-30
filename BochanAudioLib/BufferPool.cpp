@@ -6,6 +6,9 @@ bochan::BufferPool::BufferPool(size_t maxSize) : maxSize(maxSize) {}
 bochan::BufferPool::~BufferPool() {
     std::lock_guard lock(mutex);
     BOCHAN_DEBUG("Clearing buffer pool. {} UB,{} FB,{} US,{} FS,{} TS", usedBuffers.size(), freeBuffers.size(), usedSize, getFreeSize(), byteSize);;
+    if (usedBuffers.size()) {
+        BOCHAN_WARN("The buffer pool contains buffers that are currently in use!");
+    }
     for (ByteBuffer* buff : usedBuffers) {
         freeBuffer(buff);
     }
