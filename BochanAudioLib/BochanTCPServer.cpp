@@ -16,6 +16,8 @@ bool bochan::BochanTCPServer::bindAndListen(const char* ipAddress, unsigned shor
     if (!WinsockUtil::wsaStartup(this)) {
         return false;
     }
+    shutdown();
+    close();
     serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (serverSocket == INVALID_SOCKET) {
         BOCHAN_ERROR("Failed to create socket ({})!", WSAGetLastError());
@@ -26,15 +28,15 @@ bool bochan::BochanTCPServer::bindAndListen(const char* ipAddress, unsigned shor
     if (bind(serverSocket, reinterpret_cast<SOCKADDR*>(&address), sizeof(address)) != 0) {
         BOCHAN_ERROR("Failed to bind socket ({})!", WSAGetLastError());
         WinsockUtil::wsaCleanup(this);
-        shutdown();
-        close();
+        shutdownServer();
+        closeServer();
         return false;
     }
     if (listen(serverSocket, 1) == SOCKET_ERROR) {
         BOCHAN_ERROR("Failed to start listening ({})!", WSAGetLastError());
         WinsockUtil::wsaCleanup(this);
-        shutdown();
-        close();
+        shutdownServer();
+        closeServer();
         return false;
     }
     BOCHAN_DEBUG("Socket bound to {}:{} and listening!", inet_ntoa(address.sin_addr), address.sin_port);

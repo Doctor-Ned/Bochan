@@ -17,5 +17,6 @@ namespace bochan {
     private:
         SOCKET socket{ INVALID_SOCKET };
         sockaddr_in address{};
+        char recvBuffer[TCP_SOCKET_BUFFER_SIZE]{ 0 };
     };
 }
