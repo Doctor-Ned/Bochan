@@ -3,14 +3,15 @@
 #include "BochanLog.h"
 
 #include <WinSock2.h>
+#include <WS2tcpip.h>
 
 namespace bochan {
-    class BOCHANAPI WinsockUtil sealed {
+    class WinsockUtil sealed {
     public:
         WinsockUtil() = delete;
         ~WinsockUtil() = delete;
-        static bool wsaStartup(void* owner);
-        static bool wsaCleanup(void* owner);
+        BOCHANAPI static bool wsaStartup(void* owner);
+        BOCHANAPI static bool wsaCleanup(void* owner);
     private:
         static std::vector<void*> wsaInvokers;
     };

@@ -24,22 +24,40 @@ bool bochan::BochanTCPServer::bindAndListen(const char* ipAddress, unsigned shor
         WinsockUtil::wsaCleanup(this);
         return false;
     }
-    address = { AF_INET, port, inet_addr(ipAddress), {0} };
-    if (bind(serverSocket, reinterpret_cast<SOCKADDR*>(&address), sizeof(address)) != 0) {
-        BOCHAN_ERROR("Failed to bind socket ({})!", WSAGetLastError());
-        WinsockUtil::wsaCleanup(this);
+    address = { AF_INET, port, 0, {0} };
+    if (int ret = InetPtonA(address.sin_family, ipAddress, &address.sin_addr); ret != 1) {
+        if (ret == 0) {
+            BOCHAN_ERROR("An invalid IP address was provided!");
+        } else {
+            BOCHAN_ERROR("Failed to convert the IP address ({})!", WSAGetLastError());
+        }
         shutdownServer();
         closeServer();
+        WinsockUtil::wsaCleanup(this);
+        return false;
+    }
+    if (bind(serverSocket, reinterpret_cast<SOCKADDR*>(&address), sizeof(address)) != 0) {
+        BOCHAN_ERROR("Failed to bind socket ({})!", WSAGetLastError());
+        shutdownServer();
+        closeServer();
+        WinsockUtil::wsaCleanup(this);
         return false;
     }
     if (listen(serverSocket, 1) == SOCKET_ERROR) {
         BOCHAN_ERROR("Failed to start listening ({})!", WSAGetLastError());
-        WinsockUtil::wsaCleanup(this);
         shutdownServer();
         closeServer();
+        WinsockUtil::wsaCleanup(this);
         return false;
     }
-    BOCHAN_DEBUG("Socket bound to {}:{} and listening!", inet_ntoa(address.sin_addr), address.sin_port);
+    char buff[64]{ 0 };
+    PCSTR str = InetNtopA(AF_INET, &address.sin_addr, buff, 64);
+    if (str == nullptr) {
+        BOCHAN_WARN("Unable to convert the address to string ({})!", WSAGetLastError());
+        BOCHAN_DEBUG("Socket bound to and listening!");
+    } else {
+        BOCHAN_DEBUG("Socket bound to {}:{} and listening!", str, address.sin_port);
+    }
     return true;
 }
 
@@ -58,7 +76,14 @@ bool bochan::BochanTCPServer::acceptClient() {
     if (getpeername(clientSocket, reinterpret_cast<sockaddr*>(&addr), &addrSize) == SOCKET_ERROR) {
         BOCHAN_WARN("Accepted connection, but getpeername failed ({})!", WSAGetLastError());
     } else {
-        BOCHAN_DEBUG("Accepted connection from {}:{}!", inet_ntoa(addr.sin_addr), addr.sin_port);
+        char buff[64]{ 0 };
+        PCSTR str = InetNtopA(AF_INET, &address.sin_addr, buff, 64);
+        if (str == nullptr) {
+            BOCHAN_WARN("Unable to convert the address to string ({})!", WSAGetLastError());
+            BOCHAN_DEBUG("Accepted connection!");
+        } else {
+            BOCHAN_DEBUG("Accepted connection from {}:{}!", str, addr.sin_port);
+        }
     }
     shutdownServer();
     closeServer();
@@ -66,7 +91,7 @@ bool bochan::BochanTCPServer::acceptClient() {
 }
 
 bool bochan::BochanTCPServer::send(ByteBuffer* buff) {
-    if (::send(clientSocket, reinterpret_cast<char*>(buff->getPointer()), buff->getUsedSize(), 0) == SOCKET_ERROR) {
+    if (::send(clientSocket, reinterpret_cast<char*>(buff->getPointer()), static_cast<int>(buff->getUsedSize()), 0) == SOCKET_ERROR) {
         BOCHAN_ERROR("Failed to send {} data ({})!", buff->getUsedSize(), WSAGetLastError());
         return false;
     }
@@ -101,7 +126,7 @@ bool bochan::BochanTCPServer::isConnected() {
 
 bool bochan::BochanTCPServer::shutdownServer() {
     if (serverSocket != INVALID_SOCKET) {
-        if (!::shutdown(serverSocket, SD_BOTH)) {
+        if (::shutdown(serverSocket, SD_BOTH) == SOCKET_ERROR) {
             BOCHAN_WARN("Failed to shut down server socket ({})!", WSAGetLastError());
             return false;
         }
@@ -111,7 +136,7 @@ bool bochan::BochanTCPServer::shutdownServer() {
 
 bool bochan::BochanTCPServer::shutdownClient() {
     if (clientSocket != INVALID_SOCKET) {
-        if (!::shutdown(clientSocket, SD_BOTH)) {
+        if (::shutdown(clientSocket, SD_BOTH) == SOCKET_ERROR) {
             BOCHAN_WARN("Failed to shut down client socket ({})!", WSAGetLastError());
             return false;
         }
@@ -121,7 +146,7 @@ bool bochan::BochanTCPServer::shutdownClient() {
 
 bool bochan::BochanTCPServer::closeServer() {
     if (serverSocket != INVALID_SOCKET) {
-        if (!::closesocket(serverSocket)) {
+        if (::closesocket(serverSocket) == SOCKET_ERROR) {
             BOCHAN_WARN("Failed to close server socket ({})!", WSAGetLastError());
             return false;
         } else {
@@ -133,7 +158,7 @@ bool bochan::BochanTCPServer::closeServer() {
 
 bool bochan::BochanTCPServer::closeClient() {
     if (clientSocket != INVALID_SOCKET) {
-        if (!::closesocket(clientSocket)) {
+        if (::closesocket(clientSocket) == SOCKET_ERROR) {
             BOCHAN_WARN("Failed to close client socket ({})!", WSAGetLastError());
             return false;
         } else {

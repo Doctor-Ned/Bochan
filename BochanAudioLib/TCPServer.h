@@ -9,7 +9,7 @@ namespace bochan {
         ~TCPServer() = default;
         virtual bool bindAndListen(const char* ipAddress, unsigned short port) = 0;
         virtual bool isListening() = 0;
-        virtual bool acceptClient() = 0; // non-blocking
+        virtual bool acceptClient() = 0; // blocking
     private:
 
     };

@@ -8,8 +8,8 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
+#include "framework.h"
 #include "BochanAPI.h"
 #include "BochanLog.h"
-#include "framework.h"
 
 #endif //PCH_H

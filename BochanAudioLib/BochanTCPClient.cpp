@@ -24,8 +24,19 @@ bool bochan::BochanTCPClient::connect(const char* ipAddress, unsigned short port
         WinsockUtil::wsaCleanup(this);
         return false;
     }
-    address = { AF_INET, port, inet_addr(ipAddress), {0} };
-    if (::connect(socket, reinterpret_cast<sockaddr*>(&address), sizeof(address) == SOCKET_ERROR)) {
+    address = { AF_INET, port, 0, {0} };
+    if (int ret = InetPtonA(address.sin_family, ipAddress, &address.sin_addr); ret != 1) {
+        if (ret == 0) {
+            BOCHAN_ERROR("An invalid IP address was provided!");
+        } else {
+            BOCHAN_ERROR("Failed to convert the IP address ({})!", WSAGetLastError());
+        }
+        shutdown();
+        close();
+        WinsockUtil::wsaCleanup(this);
+        return false;
+    }
+    if (::connect(socket, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == SOCKET_ERROR) {
         BOCHAN_ERROR("Connection failed ({})!", WSAGetLastError());
         shutdown();
         close();
@@ -37,7 +48,7 @@ bool bochan::BochanTCPClient::connect(const char* ipAddress, unsigned short port
 }
 
 bool bochan::BochanTCPClient::send(ByteBuffer* buff) {
-    if (::send(socket, reinterpret_cast<char*>(buff->getPointer()), buff->getUsedSize(), 0) == SOCKET_ERROR) {
+    if (::send(socket, reinterpret_cast<char*>(buff->getPointer()), static_cast<int>(buff->getUsedSize()), 0) == SOCKET_ERROR) {
         BOCHAN_ERROR("Failed to send {} data ({})!", buff->getUsedSize(), WSAGetLastError());
         return false;
     }
@@ -60,7 +71,7 @@ bochan::ByteBuffer* bochan::BochanTCPClient::receive() {
 
 bool bochan::BochanTCPClient::shutdown() {
     if (socket != INVALID_SOCKET) {
-        if (!::shutdown(socket, SD_BOTH)) {
+        if (::shutdown(socket, SD_BOTH) == SOCKET_ERROR) {
             BOCHAN_WARN("Failed to shut down socket ({})!", WSAGetLastError());
             return false;
         }
@@ -70,7 +81,7 @@ bool bochan::BochanTCPClient::shutdown() {
 
 bool bochan::BochanTCPClient::close() {
     if (socket != INVALID_SOCKET) {
-        if (!::closesocket(socket)) {
+        if (::closesocket(socket) == SOCKET_ERROR) {
             BOCHAN_WARN("Failed to close socket ({})!", WSAGetLastError());
             return false;
         } else {

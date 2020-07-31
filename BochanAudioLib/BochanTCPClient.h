@@ -4,7 +4,7 @@
 #include "WinsockUtil.h"
 
 namespace bochan {
-    class BochanTCPClient sealed : public TCPClient {
+    class BOCHANAPI BochanTCPClient sealed : public TCPClient {
     public:
         BochanTCPClient(BufferPool* bufferPool);
         ~BochanTCPClient();

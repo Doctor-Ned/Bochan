@@ -4,7 +4,7 @@
 #include "WinsockUtil.h"
 
 namespace bochan {
-    class BochanTCPServer sealed : public TCPServer {
+    class BOCHANAPI BochanTCPServer sealed : public TCPServer {
     public:
         BochanTCPServer(BufferPool* bufferPool);
         ~BochanTCPServer();
