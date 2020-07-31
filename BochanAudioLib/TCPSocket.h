@@ -7,7 +7,7 @@
 namespace bochan {
     class BOCHANAPI TCPSocket {
     public:
-        TCPSocket(BufferPool* bufferPool);
+        TCPSocket(BufferPool& bufferPool);
         virtual ~TCPSocket() = default;
         virtual bool send(ByteBuffer* buff) = 0; // blocking
         virtual ByteBuffer* receive() = 0; // blocking, might return nullptr

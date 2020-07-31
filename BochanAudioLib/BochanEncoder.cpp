@@ -2,7 +2,7 @@
 #include "CodecUtil.h"
 #include "BochanEncoder.h"
 
-bochan::BochanEncoder::BochanEncoder(BufferPool* bufferPool) : AudioEncoder(bufferPool) {}
+bochan::BochanEncoder::BochanEncoder(BufferPool& bufferPool) : AudioEncoder(bufferPool) {}
 
 bochan::BochanEncoder::~BochanEncoder() {
     deinitialize();

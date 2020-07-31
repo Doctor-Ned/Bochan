@@ -6,7 +6,7 @@
 namespace bochan {
     class BOCHANAPI BochanTCPServer sealed : public TCPServer {
     public:
-        BochanTCPServer(BufferPool* bufferPool);
+        BochanTCPServer(BufferPool& bufferPool);
         ~BochanTCPServer();
         bool bindAndListen(const char* ipAddress, unsigned short port) override;
         bool isListening() override;

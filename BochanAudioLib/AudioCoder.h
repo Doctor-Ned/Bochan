@@ -6,7 +6,7 @@
 namespace bochan {
     class BOCHANAPI AudioCoder {
     public:
-        AudioCoder(BufferPool* bufferPool);
+        AudioCoder(BufferPool& bufferPool);
         virtual ~AudioCoder() = default;
         virtual void deinitialize() = 0;
         virtual bool isInitialized() const = 0;

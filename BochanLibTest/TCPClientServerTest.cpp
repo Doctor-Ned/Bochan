@@ -13,8 +13,8 @@ const uint8_t testBuff[TEST_BUFF_SIZE]{ 0, 10, 0, 40, 250, 60, 20, 120, 180, 128
 
 TEST(TCPClientServerTest, BasicClientServerTest) {
     BufferPool bufferPool(1024);
-    BochanTCPServer server(&bufferPool);
-    BochanTCPClient client(&bufferPool);
+    BochanTCPServer server(bufferPool);
+    BochanTCPClient client(bufferPool);
     ASSERT_FALSE(server.isListening());
     ASSERT_FALSE(server.isConnected());
     ASSERT_TRUE(server.bindAndListen(testAddress, testPort));

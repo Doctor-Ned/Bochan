@@ -6,7 +6,7 @@
 namespace bochan {
     class BOCHANAPI BochanTCPClient sealed : public TCPClient {
     public:
-        BochanTCPClient(BufferPool* bufferPool);
+        BochanTCPClient(BufferPool& bufferPool);
         ~BochanTCPClient();
         bool connect(const char* ipAddress, unsigned short port) override;
         bool send(ByteBuffer* buff) override;

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BochanTCPServer.h"
 
-bochan::BochanTCPServer::BochanTCPServer(BufferPool* bufferPool) : TCPServer(bufferPool) {}
+bochan::BochanTCPServer::BochanTCPServer(BufferPool& bufferPool) : TCPServer(bufferPool) {}
 
 bochan::BochanTCPServer::~BochanTCPServer() {
     if (isListening() || isConnected()) {

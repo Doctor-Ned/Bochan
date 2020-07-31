@@ -10,7 +10,7 @@ extern "C" {
 namespace bochan {
     class BOCHANAPI BochanDecoder sealed : public AudioDecoder{
     public:
-        BochanDecoder(BufferPool * bufferPool);
+        BochanDecoder(BufferPool& bufferPool);
         ~BochanDecoder();
         bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate, ByteBuffer* extradata) override;
         void deinitialize() override;

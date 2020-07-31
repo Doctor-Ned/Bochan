@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BochanTCPClient.h"
 
-bochan::BochanTCPClient::BochanTCPClient(BufferPool* bufferPool) : TCPClient(bufferPool) {}
+bochan::BochanTCPClient::BochanTCPClient(BufferPool& bufferPool) : TCPClient(bufferPool) {}
 
 bochan::BochanTCPClient::~BochanTCPClient() {
     if (isConnected()) {

@@ -2,7 +2,7 @@
 #include "AudioCoder.h"
 #include "CodecUtil.h"
 
-bochan::AudioCoder::AudioCoder(BufferPool* bufferPool) : bufferPool(bufferPool) {}
+bochan::AudioCoder::AudioCoder(BufferPool& bufferPool) : bufferPool(&bufferPool) {}
 
 bochan::ByteBuffer* bochan::AudioCoder::int16ToFloat(ByteBuffer* samples) {
     ByteBuffer* result = bufferPool->getBuffer(samples->getUsedSize() * sizeof(float) / sizeof(int16_t));
