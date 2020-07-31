@@ -85,7 +85,6 @@ bool bochan::BochanTCPServer::acceptClient() {
             BOCHAN_DEBUG("Accepted connection from {}:{}!", str, addr.sin_port);
         }
     }
-    shutdownServer();
     closeServer();
     return true;
 }
