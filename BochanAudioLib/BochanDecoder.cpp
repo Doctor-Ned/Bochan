@@ -5,7 +5,9 @@
 bochan::BochanDecoder::BochanDecoder(BufferPool& bufferPool) : AudioDecoder(bufferPool) {}
 
 bochan::BochanDecoder::~BochanDecoder() {
-    deinitialize();
+    if (initialized) {
+        deinitialize();
+    }
 }
 
 bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate, ByteBuffer* extradata) {

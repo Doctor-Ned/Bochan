@@ -5,7 +5,9 @@
 bochan::BochanEncoder::BochanEncoder(BufferPool& bufferPool) : AudioEncoder(bufferPool) {}
 
 bochan::BochanEncoder::~BochanEncoder() {
-    deinitialize();
+    if (initialized) {
+        deinitialize();
+    }
 }
 
 bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) {

@@ -58,7 +58,7 @@
       <PreprocessorDefinitions>_DEBUG;BOCHAN_LOG_LEVEL=BOCHAN_LEVEL_DEBUG;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include;$(SolutionDir)thirdparty\sdl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -67,10 +67,11 @@
       </AdditionalOptions>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;$(SolutionDir)thirdparty\sdl\lib\*.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(SolutionDir)thirdparty\ffmpeg\dll\*.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /Y "$(SolutionDir)thirdparty\ffmpeg\dll\*.dll" "$(TargetDir)"
+xcopy /Y "$(SolutionDir)thirdparty\sdl\dll\*.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying DLLs...</Message>
@@ -87,7 +88,7 @@
       <PreprocessorDefinitions>NDEBUG;BOCHAN_LOG_LEVEL=BOCHAN_LEVEL_INFO;__STDC_CONSTANT_MACROS;__STDC_LIMIT_MACROS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BochanAudioLib;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include;$(SolutionDir)thirdparty\sdl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,7 +99,7 @@
       </AdditionalOptions>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;$(SolutionDir)thirdparty\sdl\lib\*.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(SolutionDir)thirdparty\ffmpeg\dll\*.dll" "$(TargetDir)"</Command>
