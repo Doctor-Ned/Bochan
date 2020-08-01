@@ -17,6 +17,8 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 }
 
+#undef main
+
 #define AUDIO_INBUF_SIZE 20480
 #define AUDIO_REFILL_THRESH 4096
 
@@ -47,6 +49,7 @@ void bochanProviderPlayer() {
         }
     }
     player.stop();
+    bufferPool.freeBuffer(sampleBuff);
 }
 
 void bochanEncodeDecode() {

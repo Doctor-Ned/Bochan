@@ -23,6 +23,7 @@ bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
     if (startPointAvailable) {
         std::this_thread::sleep_until(startPoint);
     } else {
+        startPointAvailable = true;
         startPoint = std::chrono::system_clock::now();
     }
     int samples = static_cast<int>(buff->getUsedSize()) / sizeof(uint16_t) / CodecUtil::CHANNELS;

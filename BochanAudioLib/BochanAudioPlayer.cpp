@@ -14,6 +14,7 @@ void bochan::BochanAudioPlayer::fillData(void* ptr, Uint8* stream, int len) {
     if (len > player->sampleBufferPos) {
         player->stop();
     } else {
+        BOCHAN_DEBUG("Filling {} data from buffer...", len);
         memcpy(stream, player->sampleBuffer, len);
         if (player->sampleBufferPos > len) {
             memmove(player->sampleBuffer, player->sampleBuffer + len, player->sampleBufferPos - len);
@@ -90,6 +91,7 @@ bool bochan::BochanAudioPlayer::play() {
     }
     if (initialized && sampleBufferPos >= minBufferSize) {
         SDL_PauseAudio(0);
+        playing = true;
         return true;
     }
     return false;
@@ -98,6 +100,7 @@ bool bochan::BochanAudioPlayer::play() {
 void bochan::BochanAudioPlayer::stop() {
     if (initialized && playing) {
         SDL_PauseAudio(1);
+        playing = false;
     }
 }
 
