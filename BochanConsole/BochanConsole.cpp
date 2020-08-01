@@ -3,23 +3,53 @@
 #include "BochanEncoder.h"
 #include "BochanDecoder.h"
 #include "CodecUtil.h"
+#include "SignalProvider.h"
+#include "BochanAudioPlayer.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/channel_layout.h>
 #include <libavutil/common.h>
 #include <libavutil/frame.h>
 #include <libavutil/samplefmt.h>
+}
 
 #define AUDIO_INBUF_SIZE 20480
 #define AUDIO_REFILL_THRESH 4096
 
 using namespace bochan;
 
+void bochanProviderPlayer() {
+    const BochanCodec CODEC = BochanCodec::Vorbis;
+    const int SAMPLE_RATE = 48000;
+    const unsigned long long BIT_RATE = 64000;
+    BufferPool bufferPool(1024 * 1024 * 1024);
+    SignalProvider provider(bufferPool);
+    BochanAudioPlayer player{};
+    if (!player.initDefault(SAMPLE_RATE)) {
+        return;
+    }
+    if (!provider.init(SAMPLE_RATE)) {
+        return;
+    }
+    ByteBuffer* sampleBuff{ bufferPool.getBuffer(player.getBytesPerSecond()) };
+    for (int i = 0; i < 5; ++i) {
+        provider.fillBuffer(sampleBuff);
+        player.queueData(sampleBuff);
+        if (!player.isPlaying()) {
+            BOCHAN_INFO("Starting playback...");
+            if (!player.play()) {
+                BOCHAN_WARN("Failed to start playback!");
+            }
+        }
+    }
+    player.stop();
+}
+
 void bochanEncodeDecode() {
-    CodecUtil::initialiseAvLog();
     const BochanCodec CODEC = BochanCodec::Opus;
     const int SAMPLE_RATE = 48000;
     const unsigned long long BIT_RATE = 64000;
@@ -472,7 +502,9 @@ void avcodecEncodeDecodeTest() {
 }
 
 int main() {
+    CodecUtil::initialiseAvLog();
+    bochanProviderPlayer();
+    //bochanEncodeDecode();
     //avcodecEncodeDecodeTest();
-    bochanEncodeDecode();
     return 0;
 }

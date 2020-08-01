@@ -84,10 +84,15 @@ bool bochan::BochanAudioPlayer::isPlaying() {
     return playing;
 }
 
-void bochan::BochanAudioPlayer::play() {
-    if (initialized && !playing) {
-        SDL_PauseAudio(0);
+bool bochan::BochanAudioPlayer::play() {
+    if (playing) {
+        return true;
     }
+    if (initialized && sampleBufferPos >= minBufferSize) {
+        SDL_PauseAudio(0);
+        return true;
+    }
+    return false;
 }
 
 void bochan::BochanAudioPlayer::stop() {

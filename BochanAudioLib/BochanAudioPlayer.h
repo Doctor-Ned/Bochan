@@ -13,7 +13,7 @@ namespace bochan {
         BOCHANAPI bool isInitialized() const override;
         BOCHANAPI size_t queueData(ByteBuffer* buff) override;
         BOCHANAPI bool isPlaying() override;
-        BOCHANAPI void play() override;
+        BOCHANAPI bool play() override;
         BOCHANAPI void stop() override;
         BOCHANAPI void flush() override;
     private:
