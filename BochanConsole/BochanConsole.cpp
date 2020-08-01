@@ -37,14 +37,38 @@ void bochanProviderPlayer() {
     if (!provider.init(SAMPLE_RATE)) {
         return;
     }
-    ByteBuffer* sampleBuff{ bufferPool.getBuffer(player.getBytesPerSecond()) };
-    for (int i = 0; i < 5; ++i) {
+    BochanEncoder encoder(bufferPool);
+    if (!encoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE)) {
+        BOCHAN_CRITICAL("Encoder initialization failed!");
+        return;
+    }
+    BochanDecoder decoder(bufferPool);
+    if (!decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE, decoder.needsExtradata(CODEC) ? encoder.getExtradata() : nullptr)) {
+        BOCHAN_CRITICAL("Decoder initialization failed!");
+        return;
+    }
+    ByteBuffer* sampleBuff{ bufferPool.getBuffer(encoder.getInputBufferByteSize()) };
+    const int SECONDS = 5;
+    const bool PLAY_DIRECT = true;
+    int iterations = SECONDS * player.getBytesPerSecond() / encoder.getInputBufferByteSize();
+    for (int i = 0; i < iterations; ++i) {
         provider.fillBuffer(sampleBuff);
-        player.queueData(sampleBuff);
+        if (PLAY_DIRECT) {
+            player.queueData(sampleBuff);
+        } else {
+            std::vector<ByteBuffer*> inBuffs = encoder.encode(sampleBuff);
+            for (ByteBuffer* inBuff : inBuffs) {
+                std::vector<ByteBuffer*> output = decoder.decode(inBuff);
+                bufferPool.freeBuffer(inBuff);
+                for (ByteBuffer* outBuff : output) {
+                    player.queueData(outBuff);
+                    bufferPool.freeBuffer(outBuff);
+                }
+            }
+        }
         if (!player.isPlaying()) {
-            BOCHAN_INFO("Starting playback...");
-            if (!player.play()) {
-                BOCHAN_WARN("Failed to start playback!");
+            if (player.play()) {
+                BOCHAN_INFO("Playback started!");
             }
         }
     }
