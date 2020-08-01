@@ -17,7 +17,7 @@ namespace bochan {
         BOCHANAPI void stop() override;
         BOCHANAPI void flush() override;
     private:
-        static void fillData(void* ptr, Uint8* stream, int len);
+        BOCHANAPI static void fillData(void* ptr, Uint8* stream, int len);
         bool initialized{ false }, playing{ false };
         uint8_t* sampleBuffer{ nullptr };
         size_t sampleBufferPos{ 0ULL };
