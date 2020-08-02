@@ -20,6 +20,9 @@ bool bochan::SignalProvider::isInitialized() const {
 }
 
 bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
+    if (sampleRate == 0) {
+        return false;
+    }
     if (startPointAvailable) {
         std::this_thread::sleep_until(startPoint);
     } else {

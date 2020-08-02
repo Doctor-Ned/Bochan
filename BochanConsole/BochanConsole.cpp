@@ -49,7 +49,7 @@ void bochanProviderPlayer() {
     }
     ByteBuffer* sampleBuff{ bufferPool.getBuffer(encoder.getInputBufferByteSize()) };
     const int SECONDS = 5;
-    const bool PLAY_DIRECT = true;
+    const bool PLAY_DIRECT = false;
     int iterations = SECONDS * player.getBytesPerSecond() / encoder.getInputBufferByteSize();
     for (int i = 0; i < iterations; ++i) {
         provider.fillBuffer(sampleBuff);
@@ -91,9 +91,8 @@ void bochanEncodeDecode() {
         BOCHAN_CRITICAL("Decoder initialization failed!");
         return;
     }
-    ByteBuffer* buff = bufferPool.getBuffer(encoder.getInputBufferByteSize());
-    double t = 0;
-    double tincr = 2.0 * M_PI * 440.0 / static_cast<double>(SAMPLE_RATE);
+    SignalProvider provider(bufferPool);
+    provider.init(SAMPLE_RATE);
     FILE* outputFile, * inputFile;
     if (fopen_s(&outputFile, "output.dat", "w")) {
         BOCHAN_CRITICAL("Failed to open output file!");
@@ -103,28 +102,22 @@ void bochanEncodeDecode() {
         BOCHAN_CRITICAL("Failed to open input file!");
         return;
     }
-    for (int i = 0; i < 200; ++i) {
-        size_t buffPos = 0ULL;
-        do {
-            double value = sin(t) * 32000.0;
-            t += tincr;
-            int16_t intVal = static_cast<int16_t>(value);
-            for (int j = 0; j < CodecUtil::CHANNELS; ++j) {
-                memcpy(buff->getPointer() + buffPos, &intVal, sizeof(int16_t));
-                buffPos += sizeof(int16_t);
-            }
-        } while (buffPos < buff->getUsedSize());
+    // 5s buffer
+    ByteBuffer* fullBuff{ bufferPool.getBuffer(SAMPLE_RATE * sizeof(uint16_t) * CodecUtil::CHANNELS * 5) };
+    provider.fillBuffer(fullBuff);
+    fwrite(fullBuff->getPointer(), 1, fullBuff->getUsedSize(), inputFile);
+    fclose(inputFile);
+
+    ByteBuffer* buff = bufferPool.getBuffer(encoder.getInputBufferByteSize());
+    for (int i = 0; i < (fullBuff->getUsedSize() / encoder.getInputBufferByteSize()); ++i) {
+        memcpy(buff->getPointer(), fullBuff->getPointer() + i * buff->getUsedSize(), buff->getUsedSize());
         size_t inSize = buff->getUsedSize(), midSize = 0ULL, outSize = 0ULL;
-        fwrite(buff->getPointer(), 1, buff->getUsedSize(), inputFile);
         std::vector<ByteBuffer*> inBuffs, outBuffs;
         inBuffs = encoder.encode(buff);
         for (ByteBuffer* inBuff : inBuffs) {
             midSize += inBuff->getUsedSize();
             std::vector<ByteBuffer*> output = decoder.decode(inBuff);
             for (ByteBuffer* outBuff : output) {
-                /*for (int j = 0; j < outBuff->getSize() / 2; ++j) {
-                    BOCHAN_WARN("{}", *reinterpret_cast<int16_t*>(outBuff->getPointer() + j * 2));
-                }*/
                 fwrite(outBuff->getPointer(), 1, outBuff->getUsedSize(), outputFile);
                 outSize += outBuff->getUsedSize();
                 outBuffs.push_back(outBuff);
@@ -142,11 +135,13 @@ void bochanEncodeDecode() {
             }
         }
     }
+    fclose(outputFile);
     if (!bufferPool.freeBuffer(buff)) {
         BOCHAN_WARN("Couldn't free the sample buffer!");
     }
-    fclose(inputFile);
-    fclose(outputFile);
+    if (!bufferPool.freeBuffer(fullBuff)) {
+        BOCHAN_WARN("Couldn't free the full sample buffer!");
+    }
 }
 
 /* check that a given sample format is supported by the encoder */
