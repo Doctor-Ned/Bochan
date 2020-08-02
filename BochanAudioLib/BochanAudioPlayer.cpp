@@ -14,7 +14,6 @@ void bochan::BochanAudioPlayer::fillData(void* ptr, Uint8* stream, int len) {
     if (len > player->sampleBufferPos) {
         player->stop();
     } else {
-        BOCHAN_DEBUG("Filling {} data from buffer...", len);
         memcpy(stream, player->sampleBuffer, len);
         if (player->sampleBufferPos > len) {
             memmove(player->sampleBuffer, player->sampleBuffer + len, player->sampleBufferPos - len);
