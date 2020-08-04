@@ -3,6 +3,11 @@
 
 #include <stdexcept>
 
+std::map<bochan::BochanCodec, bochan::AVCodecConfig> bochan::CodecUtil::codecAvConfigMap{
+    {BochanCodec::Opus, {AV_CODEC_ID_OPUS, AV_SAMPLE_FMT_FLT}},
+    {BochanCodec::Vorbis, {AV_CODEC_ID_VORBIS, AV_SAMPLE_FMT_FLTP}}
+};
+
 static void avLogCallback(void* ptr, int level, const char* szFmt, va_list varg) {
     va_list vl;
     static const char* logFormat{ "[libav]{}" };
@@ -136,26 +141,12 @@ bool bochan::CodecUtil::isSampleRateSupported(const AVCodec* codec, int sampleRa
     return false;
 }
 
-AVCodecID bochan::CodecUtil::getCodecId(const BochanCodec codec) {
-    switch (codec) {
-        default:
-            return AVCodecID::AV_CODEC_ID_NONE;
-        case BochanCodec::Vorbis:
-            return AVCodecID::AV_CODEC_ID_VORBIS;
-        case BochanCodec::Opus:
-            return AVCodecID::AV_CODEC_ID_OPUS;
+bochan::AVCodecConfig bochan::CodecUtil::getCodecConfig(const BochanCodec codec) {
+    std::map<BochanCodec, AVCodecConfig>::iterator it = codecAvConfigMap.find(codec);
+    if (it == codecAvConfigMap.end()) {
+        return {};
     }
-}
-
-AVSampleFormat bochan::CodecUtil::getCodecSampleFormat(const BochanCodec codec) {
-    switch (codec) {
-        default:
-            return AVSampleFormat::AV_SAMPLE_FMT_NONE;
-        case BochanCodec::Vorbis:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLTP;
-        case BochanCodec::Opus:
-            return AVSampleFormat::AV_SAMPLE_FMT_FLT;
-    }
+    return it->second;
 }
 
 void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {

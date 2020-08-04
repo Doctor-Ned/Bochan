@@ -4,6 +4,10 @@
 
 bochan::AudioCoder::AudioCoder(BufferPool& bufferPool) : bufferPool(&bufferPool) {}
 
+bochan::CodecConfig bochan::AudioCoder::getCodecConfig() const {
+    return config;
+}
+
 bochan::ByteBuffer* bochan::AudioCoder::int16ToFloat(ByteBuffer* samples) {
     ByteBuffer* result = bufferPool->getBuffer(samples->getUsedSize() * sizeof(float) / sizeof(int16_t));
     CodecUtil::int16ToFloat(samples, reinterpret_cast<float*>(result->getPointer()));

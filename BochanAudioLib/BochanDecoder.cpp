@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "CodecUtil.h"
 #include "BochanDecoder.h"
 
 bochan::BochanDecoder::BochanDecoder(BufferPool& bufferPool) : AudioDecoder(bufferPool) {}
@@ -10,12 +9,14 @@ bochan::BochanDecoder::~BochanDecoder() {
     }
 }
 
-bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate, ByteBuffer* extradata) {
+bool bochan::BochanDecoder::initialize(const CodecConfig& config, ByteBuffer* extradata) {
     if (initialized) {
         deinitialize();
     }
-    BOCHAN_DEBUG("Decoding with codec '{}' at {} SR, {} BPS...", bochanCodec, sampleRate, bitRate);
-    if (needsExtradata(bochanCodec)) {
+    this->config = config;
+    avCodecConfig = CodecUtil::getCodecConfig(config.codec);
+    BOCHAN_DEBUG("Decoding with codec '{}' at {} SR, {} BPS...", config.codec, config.sampleRate, config.bitRate);
+    if (needsExtradata(config.codec)) {
         if (extradata == nullptr) {
             BOCHAN_ERROR("Extradata required but not provided!");
             return false;
@@ -23,31 +24,26 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
     } else if (extradata != nullptr) {
         BOCHAN_WARN("Extradata provided, but not marked as required.");
     }
-    this->bochanCodec = bochanCodec;
-    this->sampleRate = sampleRate;
-    this->bitRate = bitRate;
-    this->sampleFormat = CodecUtil::getCodecSampleFormat(bochanCodec);
-    codecId = CodecUtil::getCodecId(bochanCodec);
-    if (codecId == AV_CODEC_ID_NONE) {
-        BOCHAN_ERROR("Failed to get codec ID for codec '{}'!", bochanCodec);
+    if (avCodecConfig.codecId == AV_CODEC_ID_NONE) {
+        BOCHAN_ERROR("Failed to get codec ID for codec '{}'!", config.codec);
         deinitialize();
         return false;
     }
-    BOCHAN_DEBUG("Using codec ID '{}'...", codecId);
-    codec = avcodec_find_decoder(codecId);
+    BOCHAN_DEBUG("Using codec ID '{}'...", avCodecConfig.codecId);
+    codec = avcodec_find_decoder(avCodecConfig.codecId);
     if (!codec) {
-        BOCHAN_ERROR("Failed to get decoder for codec ID '{}'!", codecId);
+        BOCHAN_ERROR("Failed to get decoder for codec ID '{}'!", avCodecConfig.codecId);
         deinitialize();
         return false;
     }
     BOCHAN_DEBUG("Using decoder '{}'...", codec->long_name);
-    if (!CodecUtil::isSampleRateSupported(codec, sampleRate)) {
-        BOCHAN_ERROR("Sample rate {} is not supported by this codec!", sampleRate);
+    if (!CodecUtil::isSampleRateSupported(codec, config.sampleRate)) {
+        BOCHAN_ERROR("Sample rate {} is not supported by this codec!", config.sampleRate);
         deinitialize();
         return false;
     }
-    if (!CodecUtil::isFormatSupported(codec, sampleFormat)) {
-        BOCHAN_ERROR("Format '{}' is not supported by this codec!", sampleFormat);
+    if (!CodecUtil::isFormatSupported(codec, avCodecConfig.sampleFormat)) {
+        BOCHAN_ERROR("Format '{}' is not supported by this codec!", avCodecConfig.sampleFormat);
         deinitialize();
         return false;
     }
@@ -57,9 +53,9 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    context->request_sample_fmt = sampleFormat;
-    context->bit_rate = bitRate;
-    context->sample_rate = sampleRate;
+    context->request_sample_fmt = avCodecConfig.sampleFormat;
+    context->bit_rate = config.bitRate;
+    context->sample_rate = config.sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
     if (extradata) {
@@ -77,11 +73,6 @@ bool bochan::BochanDecoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    //if (context->sample_fmt != sampleFormat) {
-    //    BOCHAN_ERROR("Unable to apply requested sample format ({} != {})!", context->sample_fmt, sampleFormat);
-    //    deinitialize();
-    //    return false;
-    //}
     packet = av_packet_alloc();
     if (!packet) {
         BOCHAN_ERROR("Failed to allocate packet!");
@@ -131,29 +122,14 @@ void bochan::BochanDecoder::deinitialize() {
         }
         avcodec_free_context(&context);
     }
-    sampleFormat = AVSampleFormat::AV_SAMPLE_FMT_NONE;
     bytesPerSample = 0;
     codec = nullptr;
-    codecId = AVCodecID::AV_CODEC_ID_NONE;
-    bochanCodec = BochanCodec::None;
-    sampleRate = 0;
-    bitRate = 0ULL;
+    avCodecConfig = {};
+    config = {};
 }
 
 bool bochan::BochanDecoder::isInitialized() const {
     return initialized;
-}
-
-bochan::BochanCodec bochan::BochanDecoder::getCodec() const {
-    return bochanCodec;
-}
-
-int bochan::BochanDecoder::getSampleRate() const {
-    return sampleRate;
-}
-
-unsigned long long bochan::BochanDecoder::getBitRate() const {
-    return bitRate;
 }
 
 bool bochan::BochanDecoder::needsExtradata(BochanCodec bochanCodec) {
@@ -179,7 +155,6 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
             char err[ERROR_BUFF_SIZE] = { 0 };
             av_strerror(ret, err, ERROR_BUFF_SIZE);
             BOCHAN_ERROR("Failed to parse data: {}", err);
-            //return {};
             break;
         }
         ptr += ret;

@@ -25,25 +25,23 @@ extern "C" {
 using namespace bochan;
 
 void bochanProviderPlayer() {
-    const BochanCodec CODEC = BochanCodec::Vorbis;
-    const int SAMPLE_RATE = 48000;
-    const unsigned long long BIT_RATE = 64000;
+    const CodecConfig CONFIG{ BochanCodec::Vorbis, 48000, 64000 };
     BufferPool bufferPool(1024 * 1024 * 1024);
     SignalProvider provider(bufferPool);
     BochanAudioPlayer player{};
-    if (!player.initDefault(SAMPLE_RATE)) {
+    if (!player.initDefault(CONFIG.sampleRate)) {
         return;
     }
-    if (!provider.init(SAMPLE_RATE)) {
+    if (!provider.init(CONFIG.sampleRate)) {
         return;
     }
     BochanEncoder encoder(bufferPool);
-    if (!encoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE)) {
+    if (!encoder.initialize(CONFIG)) {
         BOCHAN_CRITICAL("Encoder initialization failed!");
         return;
     }
     BochanDecoder decoder(bufferPool);
-    if (!decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE, decoder.needsExtradata(CODEC) ? encoder.getExtradata() : nullptr)) {
+    if (!decoder.initialize(CONFIG, decoder.needsExtradata(CONFIG.codec) ? encoder.getExtradata() : nullptr)) {
         BOCHAN_CRITICAL("Decoder initialization failed!");
         return;
     }
@@ -77,22 +75,20 @@ void bochanProviderPlayer() {
 }
 
 void bochanEncodeDecode() {
-    const BochanCodec CODEC = BochanCodec::Opus;
-    const int SAMPLE_RATE = 48000;
-    const unsigned long long BIT_RATE = 64000;
+    const CodecConfig CONFIG{ BochanCodec::Vorbis, 48000, 64000 };
     BufferPool bufferPool(1024 * 1024 * 1024);
     BochanEncoder encoder(bufferPool);
-    if (!encoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE)) {
+    if (!encoder.initialize(CONFIG)) {
         BOCHAN_CRITICAL("Encoder initialization failed!");
         return;
     }
     BochanDecoder decoder(bufferPool);
-    if (!decoder.initialize(CODEC, SAMPLE_RATE, BIT_RATE, decoder.needsExtradata(CODEC) ? encoder.getExtradata() : nullptr)) {
+    if (!decoder.initialize(CONFIG, decoder.needsExtradata(CONFIG.codec) ? encoder.getExtradata() : nullptr)) {
         BOCHAN_CRITICAL("Decoder initialization failed!");
         return;
     }
     SignalProvider provider(bufferPool);
-    provider.init(SAMPLE_RATE);
+    provider.init(CONFIG.sampleRate);
     FILE* outputFile, * inputFile;
     if (fopen_s(&outputFile, "output.dat", "w")) {
         BOCHAN_CRITICAL("Failed to open output file!");
@@ -103,7 +99,7 @@ void bochanEncodeDecode() {
         return;
     }
     // 5s buffer
-    ByteBuffer* fullBuff{ bufferPool.getBuffer(SAMPLE_RATE * sizeof(uint16_t) * CodecUtil::CHANNELS * 5) };
+    ByteBuffer* fullBuff{ bufferPool.getBuffer(CONFIG.sampleRate * sizeof(uint16_t) * CodecUtil::CHANNELS * 5) };
     provider.fillBuffer(fullBuff);
     fwrite(fullBuff->getPointer(), 1, fullBuff->getUsedSize(), inputFile);
     fclose(inputFile);

@@ -11,12 +11,9 @@ namespace bochan {
     public:
         BochanEncoder(BufferPool& bufferPool);
         ~BochanEncoder();
-        bool initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) override;
+        bool initialize(const CodecConfig& config) override;
         void deinitialize() override;
         bool isInitialized() const override;
-        BochanCodec getCodec() const override;
-        int getSampleRate() const override;
-        unsigned long long getBitRate() const override;
         int getSamplesPerFrame() const override;
         int getInputBufferByteSize() const override;
         bool hasExtradata() override;
@@ -25,8 +22,7 @@ namespace bochan {
     private:
         bool initialized{ false };
         int bytesPerSample{0};
-        AVSampleFormat sampleFormat{ AVSampleFormat::AV_SAMPLE_FMT_NONE };
-        AVCodecID codecId{};
+        AVCodecConfig avCodecConfig{};
         AVCodec* codec{ nullptr };
         AVCodecContext* context{ nullptr };
         AVPacket* packet{ nullptr };

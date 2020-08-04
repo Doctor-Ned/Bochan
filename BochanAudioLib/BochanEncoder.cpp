@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "CodecUtil.h"
 #include "BochanEncoder.h"
 
 bochan::BochanEncoder::BochanEncoder(BufferPool& bufferPool) : AudioEncoder(bufferPool) {}
@@ -10,36 +9,33 @@ bochan::BochanEncoder::~BochanEncoder() {
     }
 }
 
-bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, unsigned long long bitRate) {
+bool bochan::BochanEncoder::initialize(const CodecConfig& config) {
     if (initialized) {
         deinitialize();
     }
-    BOCHAN_DEBUG("Encoding with codec '{}' at {} SR, {} BPS...", bochanCodec, sampleRate, bitRate);
-    this->bochanCodec = bochanCodec;
-    this->sampleRate = sampleRate;
-    this->bitRate = bitRate;
-    this->sampleFormat = CodecUtil::getCodecSampleFormat(bochanCodec);
-    codecId = CodecUtil::getCodecId(bochanCodec);
-    if (codecId == AV_CODEC_ID_NONE) {
-        BOCHAN_ERROR("Failed to get codec ID for codec '{}'!", bochanCodec);
+    this->config = config;
+    avCodecConfig = CodecUtil::getCodecConfig(config.codec);
+    BOCHAN_DEBUG("Encoding with codec '{}' at {} SR, {} BPS...", config.codec, config.sampleRate, config.bitRate);
+    if (avCodecConfig.codecId == AV_CODEC_ID_NONE) {
+        BOCHAN_ERROR("Failed to get codec ID for codec '{}'!", config.codec);
         deinitialize();
         return false;
     }
-    BOCHAN_DEBUG("Using codec ID '{}'...", codecId);
-    codec = avcodec_find_encoder(codecId);
+    BOCHAN_DEBUG("Using codec ID '{}'...", avCodecConfig.codecId);
+    codec = avcodec_find_encoder(avCodecConfig.codecId);
     if (!codec) {
-        BOCHAN_ERROR("Failed to get encoder for codec ID '{}'!", codecId);
+        BOCHAN_ERROR("Failed to get encoder for codec ID '{}'!", avCodecConfig.codecId);
         deinitialize();
         return false;
     }
     BOCHAN_DEBUG("Using encoder '{}'...", codec->long_name);
-    if (!CodecUtil::isSampleRateSupported(codec, sampleRate)) {
-        BOCHAN_ERROR("Sample rate {} is not supported by this codec!", sampleRate);
+    if (!CodecUtil::isSampleRateSupported(codec, config.sampleRate)) {
+        BOCHAN_ERROR("Sample rate {} is not supported by this codec!", config.sampleRate);
         deinitialize();
         return false;
     }
-    if (!CodecUtil::isFormatSupported(codec, sampleFormat)) {
-        BOCHAN_ERROR("Format '{}' is not supported by this codec!", sampleFormat);
+    if (!CodecUtil::isFormatSupported(codec, avCodecConfig.sampleFormat)) {
+        BOCHAN_ERROR("Format '{}' is not supported by this codec!", avCodecConfig.sampleFormat);
         deinitialize();
         return false;
     }
@@ -49,9 +45,9 @@ bool bochan::BochanEncoder::initialize(BochanCodec bochanCodec, int sampleRate, 
         deinitialize();
         return false;
     }
-    context->sample_fmt = sampleFormat;
-    context->bit_rate = bitRate;
-    context->sample_rate = sampleRate;
+    context->sample_fmt = avCodecConfig.sampleFormat;
+    context->bit_rate = config.bitRate;
+    context->sample_rate = config.sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
@@ -106,29 +102,14 @@ void bochan::BochanEncoder::deinitialize() {
     if (context) {
         avcodec_free_context(&context);
     }
-    sampleFormat = AVSampleFormat::AV_SAMPLE_FMT_NONE;
     bytesPerSample = 0;
     codec = nullptr;
-    codecId = AVCodecID::AV_CODEC_ID_NONE;
-    bochanCodec = BochanCodec::None;
-    sampleRate = 0;
-    bitRate = 0ULL;
+    avCodecConfig = {};
+    config = {};
 }
 
 bool bochan::BochanEncoder::isInitialized() const {
     return initialized;
-}
-
-bochan::BochanCodec bochan::BochanEncoder::getCodec() const {
-    return bochanCodec;
-}
-
-int bochan::BochanEncoder::getSampleRate() const {
-    return sampleRate;
-}
-
-unsigned long long bochan::BochanEncoder::getBitRate() const {
-    return bitRate;
 }
 
 int bochan::BochanEncoder::getSamplesPerFrame() const {

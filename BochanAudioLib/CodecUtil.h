@@ -7,10 +7,23 @@ extern "C" {
 #include <libavcodec\avcodec.h>
 }
 
+#include <map>
+
 #define ERROR_BUFF_SIZE 1024
 
 namespace bochan {
-    class BOCHANAPI CodecUtil sealed {
+    struct CodecConfig {
+        BochanCodec codec{ BochanCodec::None };
+        int sampleRate{ 0 };
+        unsigned long long bitRate{ 0 };
+    };
+
+    struct AVCodecConfig {
+        AVCodecID codecId{ AVCodecID::AV_CODEC_ID_NONE };
+        AVSampleFormat sampleFormat{ AVSampleFormat::AV_SAMPLE_FMT_NONE };
+    };
+
+    class CodecUtil sealed {
     public:
         static const int DEFAULT_SAMPLERATE = 44100;
         static const AVSampleFormat DEFAULT_SAMPLEFORMAT = AVSampleFormat::AV_SAMPLE_FMT_FLTP;
@@ -18,21 +31,22 @@ namespace bochan {
         static const uint64_t CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO;
         static const int CHANNELS = 2;
         CodecUtil() = delete;
-        static void initialiseAvLog();
-        static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
-        static int getHighestSupportedSampleRate(const AVCodec* codec);
-        static std::vector<AVSampleFormat> getSupportedSampleFormats(const AVCodec* codec);
-        static std::vector<int> getSupportedSampleRates(const AVCodec* codec);
-        static bool isSampleRateSupported(const AVCodec* codec, int sampleRate);
-        static AVCodecID getCodecId(const BochanCodec codec);
-        static AVSampleFormat getCodecSampleFormat(const BochanCodec codec);
-        static void printDebugInfo(const AVCodecContext* context);
-        static void int16ToFloat(ByteBuffer* from, float* to);
-        static void floatToInt16(ByteBuffer* from, int16_t* to);
-        static void int16ToFloat(int16_t* from, size_t count, float* to);
-        static void floatToInt16(float* from, size_t count, int16_t* to);
-        static float int16ToFloat(int16_t value);
-        static int16_t floatToInt16(float value);
+        BOCHANAPI static void initialiseAvLog();
+        BOCHANAPI static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
+        BOCHANAPI static int getHighestSupportedSampleRate(const AVCodec* codec);
+        BOCHANAPI static std::vector<AVSampleFormat> getSupportedSampleFormats(const AVCodec* codec);
+        BOCHANAPI static std::vector<int> getSupportedSampleRates(const AVCodec* codec);
+        BOCHANAPI static bool isSampleRateSupported(const AVCodec* codec, int sampleRate);
+        BOCHANAPI static AVCodecConfig getCodecConfig(const BochanCodec codec);
+        BOCHANAPI static void printDebugInfo(const AVCodecContext* context);
+        BOCHANAPI static void int16ToFloat(ByteBuffer* from, float* to);
+        BOCHANAPI static void floatToInt16(ByteBuffer* from, int16_t* to);
+        BOCHANAPI static void int16ToFloat(int16_t* from, size_t count, float* to);
+        BOCHANAPI static void floatToInt16(float* from, size_t count, int16_t* to);
+        BOCHANAPI static float int16ToFloat(int16_t value);
+        BOCHANAPI static int16_t floatToInt16(float value);
+    private:
+        static std::map<BochanCodec, AVCodecConfig> codecAvConfigMap;
     };
 }
 

@@ -2,6 +2,7 @@
 
 #include "BochanCodec.h"
 #include "BufferPool.h"
+#include "CodecUtil.h"
 
 namespace bochan {
     class BOCHANAPI AudioCoder {
@@ -10,15 +11,11 @@ namespace bochan {
         virtual ~AudioCoder() = default;
         virtual void deinitialize() = 0;
         virtual bool isInitialized() const = 0;
-        virtual BochanCodec getCodec() const = 0;
-        virtual int getSampleRate() const = 0;
-        virtual unsigned long long getBitRate() const = 0;
+        CodecConfig getCodecConfig() const;
     protected:
         ByteBuffer* int16ToFloat(ByteBuffer* samples);
         ByteBuffer* floatToInt16(ByteBuffer* fltp);
         BufferPool* bufferPool{ nullptr };
-        BochanCodec bochanCodec{ BochanCodec::None };
-        int sampleRate{ 0 };
-        unsigned long long bitRate{ 0ULL };
+        CodecConfig config{};
     };
 }
