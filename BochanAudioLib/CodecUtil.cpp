@@ -4,8 +4,8 @@
 #include <stdexcept>
 
 std::map<bochan::BochanCodec, bochan::AVCodecConfig> bochan::CodecUtil::codecAvConfigMap{
-    {BochanCodec::Opus, {AV_CODEC_ID_OPUS, AV_SAMPLE_FMT_FLT}},
-    {BochanCodec::Vorbis, {AV_CODEC_ID_VORBIS, AV_SAMPLE_FMT_FLTP}}
+    {BochanCodec::Opus, {AV_CODEC_ID_OPUS, AV_SAMPLE_FMT_FLT, "recording.opus"}},
+    {BochanCodec::Vorbis, {AV_CODEC_ID_VORBIS, AV_SAMPLE_FMT_FLTP, "recording.ogg"}}
 };
 
 static void avLogCallback(void* ptr, int level, const char* szFmt, va_list varg) {

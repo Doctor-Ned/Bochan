@@ -11,6 +11,13 @@ extern "C" {
 
 #define ERROR_BUFF_SIZE 1024
 
+#define BOCHAN_LOG_AV_ERROR(format, errorCode)          \
+do {                                                    \
+    char errorBuff[ERROR_BUFF_SIZE] = { 0 };            \
+    av_strerror(errorCode, errorBuff, ERROR_BUFF_SIZE); \
+    BOCHAN_ERROR(format, errorBuff);                    \
+} while (false)
+
 namespace bochan {
     struct CodecConfig {
         BochanCodec codec{ BochanCodec::None };
@@ -21,6 +28,7 @@ namespace bochan {
     struct AVCodecConfig {
         AVCodecID codecId{ AVCodecID::AV_CODEC_ID_NONE };
         AVSampleFormat sampleFormat{ AVSampleFormat::AV_SAMPLE_FMT_NONE };
+        const char* fileName{ nullptr };
     };
 
     class CodecUtil sealed {

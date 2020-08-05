@@ -48,7 +48,7 @@ bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
                 }
                 break;
         }
-        float fltVal = static_cast<float>(sampleValue);
+        float fltVal = static_cast<float>(sampleValue * amplitude);
         for (int j = 0; j < CodecUtil::CHANNELS; ++j) {
             floatPtr[i * CodecUtil::CHANNELS + j] = fltVal;
         }
@@ -65,6 +65,14 @@ void bochan::SignalProvider::setFrequency(double freq) {
 
 double bochan::SignalProvider::getFrequency() const {
     return frequency;
+}
+
+void bochan::SignalProvider::setAmplitude(double amplitude) {
+    this->amplitude = std::clamp(amplitude, 0.0, 1.0);
+}
+
+double bochan::SignalProvider::getAmplitude() const {
+    return amplitude;
 }
 
 void bochan::SignalProvider::setSignalWave(SignalWave signalWave) {

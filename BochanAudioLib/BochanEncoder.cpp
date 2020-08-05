@@ -51,9 +51,7 @@ bool bochan::BochanEncoder::initialize(const CodecConfig& config) {
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
-        char err[ERROR_BUFF_SIZE] = { 0 };
-        av_strerror(ret, err, ERROR_BUFF_SIZE);
-        BOCHAN_ERROR("Failed to open codec: {}", err);
+        BOCHAN_LOG_AV_ERROR("Failed to open codec: {}", ret);
         deinitialize();
         return false;
     }
@@ -78,9 +76,7 @@ bool bochan::BochanEncoder::initialize(const CodecConfig& config) {
     frame->channel_layout = context->channel_layout;
     frame->channels = context->channels;
     if (int ret = av_frame_get_buffer(frame, 0); ret < 0) {
-        char err[ERROR_BUFF_SIZE] = { 0 };
-        av_strerror(ret, err, ERROR_BUFF_SIZE);
-        BOCHAN_ERROR("Failed to allocate frame buffer: {}", err);
+        BOCHAN_LOG_AV_ERROR("Failed to allocate frame buffer: {}", ret);
         deinitialize();
         return false;
     }
@@ -102,6 +98,7 @@ void bochan::BochanEncoder::deinitialize() {
     if (context) {
         avcodec_free_context(&context);
     }
+    pts = 0;
     bytesPerSample = 0;
     codec = nullptr;
     avCodecConfig = {};
@@ -136,9 +133,7 @@ bochan::ByteBuffer* bochan::BochanEncoder::getExtradata() {
 std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
     assert(samples->getUsedSize() == getInputBufferByteSize());
     if (int ret = av_frame_make_writable(frame); ret < 0) {
-        char err[ERROR_BUFF_SIZE] = { 0 };
-        av_strerror(ret, err, ERROR_BUFF_SIZE);
-        BOCHAN_ERROR("Failed to ensure writable frame: {}", err);
+        BOCHAN_LOG_AV_ERROR("Failed to ensure writable frame: {}", ret);
         return {};
     }
     size_t expectedSamples = static_cast<size_t>(frame->nb_samples * frame->channels);
@@ -148,6 +143,8 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
                      expectedSamples, providedSamples);
         return {};
     }
+    frame->pts = pts;
+    pts += frame->nb_samples;
     switch (frame->format) {
         case AVSampleFormat::AV_SAMPLE_FMT_S16P:
         {
@@ -186,9 +183,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         }
     }
     if (int ret = avcodec_send_frame(context, frame); ret < 0) {
-        char err[ERROR_BUFF_SIZE] = { 0 };
-        av_strerror(ret, err, ERROR_BUFF_SIZE);
-        BOCHAN_ERROR("Failed to send frame to encoder: {}", err);
+        BOCHAN_LOG_AV_ERROR("Failed to send frame to encoder: {}", ret);
         return {};
     }
     std::vector<ByteBuffer*> result;
@@ -197,9 +192,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             break;
         } else if (ret < 0) {
-            char err[ERROR_BUFF_SIZE] = { 0 };
-            av_strerror(ret, err, ERROR_BUFF_SIZE);
-            BOCHAN_ERROR("Failed to encode audio frame: {}", err);
+            BOCHAN_LOG_AV_ERROR("Failed to encode audio frame: {}", ret);
             for (ByteBuffer* buff : result) {
                 if (!bufferPool->freeAndRemoveBuffer(buff)) {
                     BOCHAN_WARN("Failed to free and remove the sample buffer!");

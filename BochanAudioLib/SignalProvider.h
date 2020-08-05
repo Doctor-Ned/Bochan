@@ -19,11 +19,14 @@ namespace bochan {
         BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;
         BOCHANAPI void setFrequency(double freq);
         BOCHANAPI double getFrequency() const;
+        BOCHANAPI void setAmplitude(double amplitude);
+        BOCHANAPI double getAmplitude() const;
         BOCHANAPI void setSignalWave(SignalWave signalWave);
         BOCHANAPI SignalWave getSignalWave() const;
     private:
         BufferPool* bufferPool{ nullptr };
         double frequency{ 440.0 };
+        double amplitude{ 1.0 };
         double time{ 0.0 };
         bool startPointAvailable{ false };
         std::chrono::system_clock::time_point startPoint{};

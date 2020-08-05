@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "BochanDecoder.h"
 
+extern "C" {
+#include <libavutil/avstring.h>
+}
+
 bochan::BochanDecoder::BochanDecoder(BufferPool& bufferPool) : AudioDecoder(bufferPool) {}
 
 bochan::BochanDecoder::~BochanDecoder() {
@@ -9,11 +13,12 @@ bochan::BochanDecoder::~BochanDecoder() {
     }
 }
 
-bool bochan::BochanDecoder::initialize(const CodecConfig& config, ByteBuffer* extradata) {
+bool bochan::BochanDecoder::initialize(const CodecConfig& config, bool saveToFile, ByteBuffer* extradata) {
     if (initialized) {
         deinitialize();
     }
     this->config = config;
+    this->saveToFile = saveToFile;
     avCodecConfig = CodecUtil::getCodecConfig(config.codec);
     BOCHAN_DEBUG("Decoding with codec '{}' at {} SR, {} BPS...", config.codec, config.sampleRate, config.bitRate);
     if (needsExtradata(config.codec)) {
@@ -47,6 +52,32 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, ByteBuffer* ex
         deinitialize();
         return false;
     }
+    formatContext = avformat_alloc_context();
+    if (!formatContext) {
+        BOCHAN_ERROR("Failed to allocate format context!");
+        deinitialize();
+        return false;
+    }
+    if (saveToFile) {
+        if (int ret = avio_open(&avioContext, avCodecConfig.fileName, AVIO_FLAG_WRITE); ret < 0) {
+            BOCHAN_LOG_AV_ERROR("Failed to open avio context: {}", ret);
+            deinitialize();
+            return false;
+        }
+        formatContext->pb = avioContext;
+        formatContext->url = reinterpret_cast<char*>(av_malloc(sizeof(avCodecConfig.fileName)));
+        memcpy(formatContext->url, avCodecConfig.fileName, sizeof(avCodecConfig.fileName));
+    }
+    formatContext->oformat = av_guess_format(nullptr, avCodecConfig.fileName, nullptr);
+    if (!formatContext->oformat) {
+        BOCHAN_ERROR("Failed to find output file format!");
+        deinitialize();
+        return false;
+    }
+    if (!saveToFile) {
+        formatContext->oformat->flags |= AVFMT_NOFILE;
+    }
+    stream = avformat_new_stream(formatContext, nullptr);
     context = avcodec_alloc_context3(codec);
     if (!context) {
         BOCHAN_ERROR("Failed to allocate context!");
@@ -58,6 +89,12 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, ByteBuffer* ex
     context->sample_rate = config.sampleRate;
     context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
     context->channels = CodecUtil::CHANNELS;
+    // context->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL; // might allow experimental AAC codec?
+    stream->time_base.den = context->sample_rate;
+    stream->time_base.num = 1;
+    if (formatContext->oformat->flags & AVFMT_GLOBALHEADER) {
+        context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    }
     if (extradata) {
         context->extradata_size = static_cast<int>(extradata->getUsedSize());
         context->extradata = reinterpret_cast<uint8_t*>(av_malloc(context->extradata_size));
@@ -67,11 +104,21 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, ByteBuffer* ex
         }
     }
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
-        char err[ERROR_BUFF_SIZE] = { 0 };
-        av_strerror(ret, err, ERROR_BUFF_SIZE);
-        BOCHAN_ERROR("Failed to open codec: {}", err);
+        BOCHAN_LOG_AV_ERROR("Failed to open codec: {}", ret);
         deinitialize();
         return false;
+    }
+    if (int ret = avcodec_parameters_from_context(stream->codecpar, context); ret < 0) {
+        BOCHAN_LOG_AV_ERROR("Failed to initialize stream parameters: {}", ret);
+        deinitialize();
+        return false;
+    }
+    if (saveToFile) {
+        if (int ret = avformat_write_header(formatContext, nullptr); ret < 0) {
+            BOCHAN_LOG_AV_ERROR("Failed to write file header: {}", ret);
+            deinitialize();
+            return false;
+        }
     }
     packet = av_packet_alloc();
     if (!packet) {
@@ -79,6 +126,8 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, ByteBuffer* ex
         deinitialize();
         return false;
     }
+    packet->data = nullptr;
+    packet->size = 0;
     frame = av_frame_alloc();
     if (!frame) {
         BOCHAN_ERROR("Failed to allocate frame!");
@@ -114,6 +163,19 @@ void bochan::BochanDecoder::deinitialize() {
     if (packet) {
         av_packet_free(&packet);
     }
+    if (formatContext) {
+        if (saveToFile) {
+            if (int ret = av_write_frame(formatContext, nullptr); ret < 0) {
+                BOCHAN_LOG_AV_ERROR("Failed to flush frame to the file: {}", ret);
+            }
+        }
+        avformat_free_context(formatContext);
+    }
+    if (avioContext) {
+        if (int ret = avio_close(avioContext); ret < 0) {
+            BOCHAN_LOG_AV_ERROR("Failed to close AVIO context: {}", ret);
+        }
+    }
     if (context) {
         if (context->extradata) {
             av_free(context->extradata);
@@ -122,6 +184,7 @@ void bochan::BochanDecoder::deinitialize() {
         }
         avcodec_free_context(&context);
     }
+    saveToFile = false;
     bytesPerSample = 0;
     codec = nullptr;
     avCodecConfig = {};
@@ -152,30 +215,27 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
         ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
                                ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
         if (ret < 0) {
-            char err[ERROR_BUFF_SIZE] = { 0 };
-            av_strerror(ret, err, ERROR_BUFF_SIZE);
-            BOCHAN_ERROR("Failed to parse data: {}", err);
+            BOCHAN_LOG_AV_ERROR("Failed to parse data: {}", ret);
             break;
         }
         ptr += ret;
         size -= ret;
         if (packet->size) {
-            ret = avcodec_send_packet(context, packet);
-            if (ret < 0) {
-                char err[ERROR_BUFF_SIZE] = { 0 };
-                av_strerror(ret, err, ERROR_BUFF_SIZE);
-                BOCHAN_ERROR("Failed to send packet to decoder: {}", err);
+            if (saveToFile) {
+                if (ret = av_write_frame(formatContext, packet); ret < 0) {
+                    BOCHAN_LOG_AV_ERROR("Failed to write frame to the file: {}", ret);
+                }
+            }
+            if (ret = avcodec_send_packet(context, packet); ret < 0) {
+                BOCHAN_LOG_AV_ERROR("Failed to send packet to decoder: {}", ret);
                 return {};
             }
             while (true) {
-                ret = avcodec_receive_frame(context, frame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                if (ret = avcodec_receive_frame(context, frame); ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
                 }
                 if (ret < 0) {
-                    char err[ERROR_BUFF_SIZE] = { 0 };
-                    av_strerror(ret, err, ERROR_BUFF_SIZE);
-                    BOCHAN_ERROR("Failed to decode audio frame: {}", err);
+                    BOCHAN_LOG_AV_ERROR("Failed to decode audio frame: {}", ret);
                     for (ByteBuffer* buff : result) {
                         if (!bufferPool->freeAndRemoveBuffer(buff)) {
                             BOCHAN_WARN("Failed to free and remove the sample buffer!");

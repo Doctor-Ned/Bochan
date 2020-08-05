@@ -25,7 +25,7 @@ extern "C" {
 using namespace bochan;
 
 void bochanProviderPlayer() {
-    const CodecConfig CONFIG{ BochanCodec::Vorbis, 48000, 64000 };
+    const CodecConfig CONFIG{ BochanCodec::Opus, 48000, 64000 };
     BufferPool bufferPool(1024 * 1024 * 1024);
     SignalProvider provider(bufferPool);
     BochanAudioPlayer player{};
@@ -35,18 +35,19 @@ void bochanProviderPlayer() {
     if (!provider.init(CONFIG.sampleRate)) {
         return;
     }
+    provider.setAmplitude(0.5);
     BochanEncoder encoder(bufferPool);
     if (!encoder.initialize(CONFIG)) {
         BOCHAN_CRITICAL("Encoder initialization failed!");
         return;
     }
     BochanDecoder decoder(bufferPool);
-    if (!decoder.initialize(CONFIG, decoder.needsExtradata(CONFIG.codec) ? encoder.getExtradata() : nullptr)) {
+    if (!decoder.initialize(CONFIG, false, decoder.needsExtradata(CONFIG.codec) ? encoder.getExtradata() : nullptr)) {
         BOCHAN_CRITICAL("Decoder initialization failed!");
         return;
     }
     ByteBuffer* sampleBuff{ bufferPool.getBuffer(encoder.getInputBufferByteSize()) };
-    const int SECONDS = 5;
+    const int SECONDS = 3;
     const bool PLAY_DIRECT = false;
     int iterations = SECONDS * player.getBytesPerSecond() / encoder.getInputBufferByteSize();
     for (int i = 0; i < iterations; ++i) {
@@ -83,7 +84,7 @@ void bochanEncodeDecode() {
         return;
     }
     BochanDecoder decoder(bufferPool);
-    if (!decoder.initialize(CONFIG, decoder.needsExtradata(CONFIG.codec) ? encoder.getExtradata() : nullptr)) {
+    if (!decoder.initialize(CONFIG, false, decoder.needsExtradata(CONFIG.codec) ? encoder.getExtradata() : nullptr)) {
         BOCHAN_CRITICAL("Decoder initialization failed!");
         return;
     }
