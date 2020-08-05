@@ -49,7 +49,7 @@ void bochanProviderPlayer() {
     ByteBuffer* sampleBuff{ bufferPool.getBuffer(encoder.getInputBufferByteSize()) };
     const int SECONDS = 3;
     const bool PLAY_DIRECT = false;
-    int iterations = SECONDS * player.getBytesPerSecond() / encoder.getInputBufferByteSize();
+    int iterations = static_cast<int>(SECONDS * player.getBytesPerSecond() / encoder.getInputBufferByteSize());
     for (int i = 0; i < iterations; ++i) {
         provider.fillBuffer(sampleBuff);
         if (PLAY_DIRECT) {
