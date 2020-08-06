@@ -8,6 +8,7 @@ constexpr int SAMPLE_RATE = 48000;
 
 TEST(SignalProvider, TimeSimulatedProperly) {
     using namespace std::chrono;
+    const milliseconds EXPECTED_MIN_MILLIS{ 950 };
     BufferPool bufferPool(1024 * 1024 * 1024);
     SignalProvider provider(bufferPool);
     ASSERT_TRUE(provider.initialize(SAMPLE_RATE));
@@ -16,17 +17,17 @@ TEST(SignalProvider, TimeSimulatedProperly) {
     system_clock::time_point startPoint{ system_clock::now() }, endPoint;
     ASSERT_TRUE(provider.fillBuffer(buff));
     endPoint = system_clock::now();
-    ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) >= seconds(1));
+    ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) >= EXPECTED_MIN_MILLIS);
     startPoint = endPoint;
     ASSERT_TRUE(provider.fillBuffer(buff));
     endPoint = system_clock::now();
-    ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) >= seconds(1));
+    ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) >= EXPECTED_MIN_MILLIS);
     provider.setSimulateTime(false);
     ASSERT_FALSE(provider.isSimulatingTime());
     startPoint = endPoint;
     ASSERT_TRUE(provider.fillBuffer(buff));
     endPoint = system_clock::now();
-    ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) < seconds(1));
+    ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) < EXPECTED_MIN_MILLIS);
 
 }
 
@@ -69,4 +70,5 @@ TEST(SignalProvider, AmplitudeValid) {
     }
     ASSERT_LE(max, 16383);
     ASSERT_GE(min, -16384);
+    bufferPool.freeBuffer(buff);
 }
