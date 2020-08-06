@@ -90,6 +90,12 @@
     <ClInclude Include="SignalProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CodecConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AVCodecConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

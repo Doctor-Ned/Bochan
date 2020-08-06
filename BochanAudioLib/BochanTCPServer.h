@@ -8,6 +8,10 @@ namespace bochan {
     public:
         BochanTCPServer(BufferPool& bufferPool);
         ~BochanTCPServer();
+        BochanTCPServer(BochanTCPServer&) = delete;
+        BochanTCPServer(BochanTCPServer&&) = delete;
+        BochanTCPServer& operator=(BochanTCPServer&) = delete;
+        BochanTCPServer& operator=(BochanTCPServer&&) = delete;
         bool bindAndListen(const char* ipAddress, unsigned short port) override;
         bool isListening() override;
         bool acceptClient() override;

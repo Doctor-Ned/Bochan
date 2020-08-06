@@ -12,6 +12,10 @@ namespace bochan {
     public:
         BochanDecoder(BufferPool & bufferPool);
         ~BochanDecoder();
+        BochanDecoder(BochanDecoder&) = delete;
+        BochanDecoder(BochanDecoder&&) = delete;
+        BochanDecoder& operator=(BochanDecoder&) = delete;
+        BochanDecoder& operator=(BochanDecoder&&) = delete;
         bool initialize(const CodecConfig& config, bool saveToFile, ByteBuffer* extradata) override;
         void deinitialize() override;
         bool isInitialized() const override;

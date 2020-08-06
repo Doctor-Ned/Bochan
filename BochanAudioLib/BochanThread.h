@@ -7,7 +7,12 @@
 namespace bochan {
     class BochanThread sealed : public Thread {
     public:
+        BochanThread() = default;
         BOCHANAPI ~BochanThread();
+        BochanThread(BochanThread&) = delete;
+        BochanThread(BochanThread&&) = delete;
+        BochanThread& operator=(BochanThread&) = delete;
+        BochanThread& operator=(BochanThread&&) = delete;
         BOCHANAPI bool run(ThreadFunc func, void* ptr) override;
         BOCHANAPI bool isRunning() override;
         BOCHANAPI void interrupt() override;

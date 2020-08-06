@@ -1,11 +1,8 @@
 #pragma once
 
-#include "BochanCodec.h"
+#include "CodecConfig.h"
+#include "AVCodecConfig.h"
 #include "Buffer.h"
-
-extern "C" {
-#include <libavcodec\avcodec.h>
-}
 
 #include <map>
 
@@ -19,18 +16,6 @@ do {                                                    \
 } while (false)
 
 namespace bochan {
-    struct CodecConfig {
-        BochanCodec codec{ BochanCodec::None };
-        int sampleRate{ 0 };
-        unsigned long long bitRate{ 0 };
-    };
-
-    struct AVCodecConfig {
-        AVCodecID codecId{ AVCodecID::AV_CODEC_ID_NONE };
-        AVSampleFormat sampleFormat{ AVSampleFormat::AV_SAMPLE_FMT_NONE };
-        const char* fileName{ nullptr };
-    };
-
     class CodecUtil sealed {
     public:
         static const int DEFAULT_SAMPLERATE = 44100;

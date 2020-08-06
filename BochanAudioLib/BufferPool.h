@@ -6,6 +6,10 @@ namespace bochan {
     public:
         BOCHANAPI BufferPool(size_t maxSize);
         BOCHANAPI ~BufferPool();
+        BufferPool(BufferPool&) = delete;
+        BufferPool(BufferPool&&) = delete;
+        BufferPool& operator=(BufferPool&) = delete;
+        BufferPool& operator=(BufferPool&&) = delete;
         BOCHANAPI ByteBuffer* getBuffer(size_t size);
         BOCHANAPI bool freeBuffer(ByteBuffer* buffer);
         BOCHANAPI bool freeAndRemoveBuffer(ByteBuffer* buffer);

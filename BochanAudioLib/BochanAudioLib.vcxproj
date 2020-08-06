@@ -99,6 +99,7 @@
     <ClInclude Include="AudioEncoder.h" />
     <ClInclude Include="AudioPlayer.h" />
     <ClInclude Include="AudioProvider.h" />
+    <ClInclude Include="AVCodecConfig.h" />
     <ClInclude Include="BochanAPI.h" />
     <ClInclude Include="BochanAudioPlayer.h" />
     <ClInclude Include="BochanCodec.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="BochanThread.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="BufferPool.h" />
+    <ClInclude Include="CodecConfig.h" />
     <ClInclude Include="CodecUtil.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />

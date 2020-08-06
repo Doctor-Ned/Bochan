@@ -13,6 +13,10 @@ namespace bochan {
     public:
         BOCHANAPI SignalProvider(BufferPool& bufferPool);
         ~SignalProvider() = default;
+        SignalProvider(SignalProvider&) = delete;
+        SignalProvider(SignalProvider&&) = delete;
+        SignalProvider& operator=(SignalProvider&) = delete;
+        SignalProvider& operator=(SignalProvider&&) = delete;
         BOCHANAPI bool init(int sampleRate) override;
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;

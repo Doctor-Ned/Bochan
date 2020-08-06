@@ -8,6 +8,10 @@ namespace bochan {
     public:
         BochanTCPClient(BufferPool& bufferPool);
         ~BochanTCPClient();
+        BochanTCPClient(BochanTCPClient&) = delete;
+        BochanTCPClient(BochanTCPClient&&) = delete;
+        BochanTCPClient& operator=(BochanTCPClient&) = delete;
+        BochanTCPClient& operator=(BochanTCPClient&&) = delete;
         bool connect(const char* ipAddress, unsigned short port) override;
         bool send(ByteBuffer* buff) override;
         ByteBuffer* receive() override;

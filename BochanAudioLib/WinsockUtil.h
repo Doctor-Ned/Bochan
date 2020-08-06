@@ -9,7 +9,6 @@ namespace bochan {
     class WinsockUtil sealed {
     public:
         WinsockUtil() = delete;
-        ~WinsockUtil() = delete;
         BOCHANAPI static bool wsaStartup(void* owner);
         BOCHANAPI static bool wsaCleanup(void* owner);
     private:
