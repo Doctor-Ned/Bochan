@@ -23,12 +23,14 @@ namespace bochan {
         BOCHANAPI double getAmplitude() const;
         BOCHANAPI void setSignalWave(SignalWave signalWave);
         BOCHANAPI SignalWave getSignalWave() const;
+        BOCHANAPI void setSimulateTime(bool simulateTime);
+        BOCHANAPI bool isSimulatingTime() const;
     private:
         BufferPool* bufferPool{ nullptr };
         double frequency{ 440.0 };
         double amplitude{ 1.0 };
         double time{ 0.0 };
-        bool startPointAvailable{ false };
+        bool startPointAvailable{ false }, simulateTime{ true };
         std::chrono::system_clock::time_point startPoint{};
         SignalWave signalWave{ SignalWave::Sin };
     };

@@ -23,18 +23,20 @@ bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
     if (sampleRate == 0) {
         return false;
     }
-    if (startPointAvailable) {
-        std::this_thread::sleep_until(startPoint);
-    } else {
-        startPointAvailable = true;
-        startPoint = std::chrono::system_clock::now();
-    }
     int samples = static_cast<int>(buff->getUsedSize()) / sizeof(uint16_t) / CodecUtil::CHANNELS;
-    std::chrono::microseconds buffTimeNanos{
-        static_cast<long long>(
-            floor(1'000'000.0 / static_cast<double>(sampleRate))
-            * static_cast<double>(samples)
-            ) };
+    if (simulateTime) {
+        std::chrono::microseconds buffTimeNanos{
+            static_cast<long long>(
+                floor(1'000'000.0 / static_cast<double>(sampleRate))
+                * static_cast<double>(samples)
+                ) };
+        if (!startPointAvailable) {
+            startPointAvailable = true;
+            startPoint = std::chrono::system_clock::now();
+        }
+        startPoint += buffTimeNanos;
+        std::this_thread::sleep_until(startPoint);
+    }
     ByteBuffer* floatBuff = bufferPool->getBuffer(buff->getUsedSize() * 2ULL);
     float* floatPtr = reinterpret_cast<float*>(floatBuff->getPointer());
     double tincr = 2.0 * M_PI * frequency / static_cast<double>(sampleRate);
@@ -55,7 +57,6 @@ bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
     }
     CodecUtil::floatToInt16(floatPtr, samples * CodecUtil::CHANNELS, reinterpret_cast<int16_t*>(buff->getPointer()));
     bufferPool->freeBuffer(floatBuff);
-    startPoint += buffTimeNanos;
     return true;
 }
 
@@ -79,6 +80,15 @@ void bochan::SignalProvider::setSignalWave(SignalWave signalWave) {
     this->signalWave = signalWave;
 }
 
+BOCHANAPI bool bochan::SignalProvider::isSimulatingTime() const {
+    return simulateTime;
+}
+
 bochan::SignalWave bochan::SignalProvider::getSignalWave() const {
     return signalWave;
+}
+
+BOCHANAPI void bochan::SignalProvider::setSimulateTime(bool simulateTime) {
+    this->simulateTime = simulateTime;
+    startPointAvailable = false;
 }
