@@ -4,7 +4,7 @@
 
 bochan::SignalProvider::SignalProvider(BufferPool& bufferPool) : bufferPool(&bufferPool) {}
 
-bool bochan::SignalProvider::init(int sampleRate) {
+bool bochan::SignalProvider::initialize(int sampleRate) {
     this->sampleRate = sampleRate;
     return true;
 }
@@ -23,11 +23,11 @@ bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
     if (sampleRate == 0) {
         return false;
     }
-    int samples = static_cast<int>(buff->getUsedSize()) / sizeof(uint16_t) / CodecUtil::CHANNELS;
+    int samples = static_cast<int>(buff->getUsedSize()) / sizeof(int16_t) / CodecUtil::CHANNELS;
     if (simulateTime) {
         std::chrono::microseconds buffTimeNanos{
             static_cast<long long>(
-                floor(1'000'000.0 / static_cast<double>(sampleRate))
+                1'000'000.0 / static_cast<double>(sampleRate)
                 * static_cast<double>(samples)
                 ) };
         if (!startPointAvailable) {
@@ -37,7 +37,7 @@ bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
         startPoint += buffTimeNanos;
         std::this_thread::sleep_until(startPoint);
     }
-    ByteBuffer* floatBuff = bufferPool->getBuffer(buff->getUsedSize() * 2ULL);
+    ByteBuffer* floatBuff = bufferPool->getBuffer(buff->getUsedSize() * sizeof(float) / sizeof(int16_t));
     float* floatPtr = reinterpret_cast<float*>(floatBuff->getPointer());
     double tincr = 2.0 * M_PI * frequency / static_cast<double>(sampleRate);
     for (int i = 0; i < samples; ++i) {

@@ -22,7 +22,7 @@ void bochan::BochanAudioPlayer::fillData(void* ptr, Uint8* stream, int len) {
     }
 }
 
-bool bochan::BochanAudioPlayer::init(int sampleRate, size_t minBufferSize, size_t maxBufferSize) {
+bool bochan::BochanAudioPlayer::initialize(int sampleRate, size_t minBufferSize, size_t maxBufferSize) {
     if (initialized) {
         deinitialize();
     }

@@ -17,7 +17,7 @@ namespace bochan {
         SignalProvider(SignalProvider&&) = delete;
         SignalProvider& operator=(SignalProvider&) = delete;
         SignalProvider& operator=(SignalProvider&&) = delete;
-        BOCHANAPI bool init(int sampleRate) override;
+        BOCHANAPI bool initialize(int sampleRate) override;
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
         BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;

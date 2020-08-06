@@ -12,7 +12,7 @@ namespace bochan {
         BochanAudioPlayer(BochanAudioPlayer&&) = delete;
         BochanAudioPlayer& operator=(BochanAudioPlayer&) = delete;
         BochanAudioPlayer& operator=(BochanAudioPlayer&&) = delete;
-        BOCHANAPI bool init(int sampleRate, size_t minBufferSize, size_t maxBufferSize) override;
+        BOCHANAPI bool initialize(int sampleRate, size_t minBufferSize, size_t maxBufferSize) override;
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
         BOCHANAPI size_t queueData(ByteBuffer* buff) override;

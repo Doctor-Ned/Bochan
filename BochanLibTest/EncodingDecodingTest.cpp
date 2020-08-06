@@ -15,7 +15,7 @@ TEST(EncodingDecoding, BitrateBasedQualityLossTest) {
     provider.setSimulateTime(false);
     BochanEncoder hqEncoder(bufferPool), lqEncoder(bufferPool);
     BochanDecoder hqDecoder(bufferPool), lqDecoder(bufferPool);
-    ASSERT_TRUE(provider.init(SAMPLE_RATE));
+    ASSERT_TRUE(provider.initialize(SAMPLE_RATE));
     ASSERT_TRUE(hqEncoder.initialize(HQ_CONFIG));
     ASSERT_TRUE(hqDecoder.initialize(HQ_CONFIG, false, hqDecoder.needsExtradata(HQ_CONFIG.codec) ? hqEncoder.getExtradata() : nullptr));
     ASSERT_TRUE(lqEncoder.initialize(LQ_CONFIG));
@@ -46,7 +46,7 @@ TEST(EncodingDecoding, BitrateBasedQualityLossTest) {
         }
     }
     size_t sizeToCompare{ min(hqPos, lqPos) };
-    size_t samples{ sizeToCompare / 2ULL };
+    size_t samples{ sizeToCompare / sizeof(int16_t) };
     float* inputFlt{ new float[samples] }, * hqFlt{ new float[samples] }, * lqFlt{ new float[samples] };
     CodecUtil::int16ToFloat(reinterpret_cast<int16_t*>(inputSignal->getPointer()), samples, inputFlt);
     CodecUtil::int16ToFloat(reinterpret_cast<int16_t*>(hqSignal->getPointer()), samples, hqFlt);
