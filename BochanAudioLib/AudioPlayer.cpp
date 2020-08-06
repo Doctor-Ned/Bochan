@@ -2,10 +2,10 @@
 #include "AudioPlayer.h"
 #include "CodecUtil.h"
 
-bool bochan::AudioPlayer::initializeDefault(int sampleRate) {
+bool bochan::AudioPlayer::initializeDefault(const char* audioDevice, int sampleRate) {
     this->sampleRate = sampleRate;
     size_t bytesPerSecond = getBytesPerSecond();
-    return initialize(sampleRate, bytesPerSecond / 2ULL, bytesPerSecond * 2ULL);
+    return initialize(audioDevice, sampleRate, bytesPerSecond / 2ULL, bytesPerSecond * 2ULL);
 }
 
 size_t bochan::AudioPlayer::getMinBufferSize() const {

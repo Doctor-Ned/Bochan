@@ -29,7 +29,7 @@ void bochanProviderPlayer() {
     BufferPool bufferPool(1024 * 1024 * 1024);
     SignalProvider provider(bufferPool);
     BochanAudioPlayer player{};
-    if (!player.initializeDefault(CONFIG.sampleRate)) {
+    if (!player.initializeDefault(nullptr, CONFIG.sampleRate)) {
         return;
     }
     if (!provider.initialize(CONFIG.sampleRate)) {
