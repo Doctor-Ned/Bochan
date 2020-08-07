@@ -213,7 +213,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(AudioPacket audio
     while (size) {
         int ret{};
         ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                               ptr, static_cast<int>(size), audioPacket.pts, audioPacket.dts, 0);
+                               ptr, static_cast<int>(size), audioPacket.pts, audioPacket.pts, 0);
         if (ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to parse data: {}", ret);
             break;
@@ -221,7 +221,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(AudioPacket audio
         ptr += ret;
         size -= ret;
         packet->pts = audioPacket.pts;
-        packet->dts = audioPacket.dts;
+        packet->dts = audioPacket.pts;
         if (packet->size) {
             if (saveToFile) {
                 if (ret = av_write_frame(formatContext, packet); ret < 0) {

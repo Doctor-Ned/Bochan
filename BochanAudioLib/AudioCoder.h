@@ -1,16 +1,11 @@
 #pragma once
 
+#include "AudioPacket.h"
 #include "BochanCodec.h"
 #include "BufferPool.h"
 #include "CodecUtil.h"
 
 namespace bochan {
-    struct AudioPacket {
-        ByteBuffer* buffer{ nullptr };
-        int64_t pts{ 0 };
-        int64_t dts{ 0 };
-    };
-
     class BOCHANAPI AudioCoder {
     public:
         AudioCoder(BufferPool& bufferPool);

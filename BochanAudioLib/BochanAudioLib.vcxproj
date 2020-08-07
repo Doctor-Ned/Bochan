@@ -97,6 +97,7 @@
     <ClInclude Include="AudioCoder.h" />
     <ClInclude Include="AudioDecoder.h" />
     <ClInclude Include="AudioEncoder.h" />
+    <ClInclude Include="AudioPacket.h" />
     <ClInclude Include="AudioPlayer.h" />
     <ClInclude Include="AudioProvider.h" />
     <ClInclude Include="AVCodecConfig.h" />

@@ -28,21 +28,21 @@ TEST(EncodingDecoding, BitrateBasedQualityLossTest) {
     size_t hqPos{ 0ULL }, lqPos{ 0ULL };
     for (size_t i = 0ULL; i < FRAME_COUNT; ++i) {
         memcpy(frameBuff->getPointer(), inputSignal->getPointer() + i * frameBuff->getUsedSize(), frameBuff->getUsedSize());
-        for (ByteBuffer* buff : hqEncoder.encode(frameBuff)) {
-            for (ByteBuffer* dec : hqDecoder.decode(buff)) {
+        for (AudioPacket packet : hqEncoder.encode(frameBuff)) {
+            for (ByteBuffer* dec : hqDecoder.decode(packet)) {
                 memcpy(hqSignal->getPointer() + hqPos, dec->getPointer(), dec->getUsedSize());
                 hqPos += dec->getUsedSize();
                 bufferPool.freeBuffer(dec);
             }
-            bufferPool.freeBuffer(buff);
+            bufferPool.freeBuffer(packet.buffer);
         }
-        for (ByteBuffer* buff : lqEncoder.encode(frameBuff)) {
-            for (ByteBuffer* dec : lqDecoder.decode(buff)) {
+        for (AudioPacket packet : lqEncoder.encode(frameBuff)) {
+            for (ByteBuffer* dec : lqDecoder.decode(packet)) {
                 memcpy(lqSignal->getPointer() + lqPos, dec->getPointer(), dec->getUsedSize());
                 lqPos += dec->getUsedSize();
                 bufferPool.freeBuffer(dec);
             }
-            bufferPool.freeBuffer(buff);
+            bufferPool.freeBuffer(packet.buffer);
         }
     }
     size_t sizeToCompare{ min(hqPos, lqPos) };

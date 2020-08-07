@@ -202,7 +202,7 @@ std::vector<bochan::AudioPacket> bochan::BochanEncoder::encode(ByteBuffer* sampl
         }
         ByteBuffer* buff = bufferPool->getBuffer(packet->size);
         memcpy(buff->getPointer(), packet->data, packet->size);
-        result.push_back({ buff, packet->pts, packet->dts });
+        result.push_back({ buff, packet->pts });
     }
     return result;
 }
