@@ -28,7 +28,7 @@ TEST(SignalProvider, TimeSimulatedProperly) {
     ASSERT_TRUE(provider.fillBuffer(buff));
     endPoint = system_clock::now();
     ASSERT_TRUE(duration_cast<milliseconds>(endPoint - startPoint) < EXPECTED_MIN_MILLIS);
-
+    bufferPool.freeBuffer(buff);
 }
 
 TEST(SignalProvider, AmplitudeValid) {
