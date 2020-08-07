@@ -184,8 +184,6 @@ void bochan::BochanDecoder::deinitialize() {
         }
         avcodec_free_context(&context);
     }
-    pts = 0;
-    dts = 0;
     saveToFile = false;
     bytesPerSample = 0;
     codec = nullptr;
@@ -208,24 +206,22 @@ bool bochan::BochanDecoder::needsExtradata(BochanCodec bochanCodec) {
     }
 }
 
-std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* samples) {
-    uint8_t* ptr = samples->getPointer();
-    size_t size = samples->getUsedSize();
+std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(AudioPacket audioPacket) {
+    uint8_t* ptr = audioPacket.buffer->getPointer();
+    size_t size = audioPacket.buffer->getUsedSize();
     std::vector<bochan::ByteBuffer*> result;
     while (size) {
         int ret{};
         ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                               ptr, static_cast<int>(size), pts, dts, 0);
+                               ptr, static_cast<int>(size), audioPacket.pts, audioPacket.dts, 0);
         if (ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to parse data: {}", ret);
             break;
         }
-        packet->pts = pts;
-        packet->dts = dts;
-        ++dts;
-        pts += ret / CodecUtil::CHANNELS / sizeof(int16_t);
         ptr += ret;
         size -= ret;
+        packet->pts = audioPacket.pts;
+        packet->dts = audioPacket.dts;
         if (packet->size) {
             if (saveToFile) {
                 if (ret = av_write_frame(formatContext, packet); ret < 0) {

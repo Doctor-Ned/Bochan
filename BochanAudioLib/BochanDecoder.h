@@ -20,12 +20,10 @@ namespace bochan {
         void deinitialize() override;
         bool isInitialized() const override;
         bool needsExtradata(BochanCodec bochanCodec) override;
-        std::vector<ByteBuffer*> decode(ByteBuffer* samples) override;
+        std::vector<ByteBuffer*> decode(AudioPacket packet) override;
     private:
         bool initialized{ false }, saveToFile{ false };
         int bytesPerSample{ 0 };
-        int64_t pts{ 0 };
-        int64_t dts{ 0 };
         AVCodecConfig avCodecConfig{};
         AVCodec* codec{ nullptr };
         AVCodecContext* context{ nullptr };

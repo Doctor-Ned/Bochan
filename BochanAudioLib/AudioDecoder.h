@@ -8,6 +8,6 @@ namespace bochan {
         AudioDecoder(BufferPool& bufferPool);
         virtual bool initialize(const CodecConfig& config, bool saveToFile, ByteBuffer* extradata) = 0;
         virtual bool needsExtradata(BochanCodec bochanCodec) = 0;
-        virtual std::vector<ByteBuffer*> decode(ByteBuffer* samples) = 0;
+        virtual std::vector<ByteBuffer*> decode(AudioPacket packet) = 0;
     };
 }

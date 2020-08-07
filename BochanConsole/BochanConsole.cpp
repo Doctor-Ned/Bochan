@@ -55,10 +55,10 @@ void bochanProviderPlayer() {
         if (PLAY_DIRECT) {
             player.queueData(sampleBuff);
         } else {
-            std::vector<ByteBuffer*> inBuffs = encoder.encode(sampleBuff);
-            for (ByteBuffer* inBuff : inBuffs) {
-                std::vector<ByteBuffer*> output = decoder.decode(inBuff);
-                bufferPool.freeBuffer(inBuff);
+            std::vector<AudioPacket> inBuffs = encoder.encode(sampleBuff);
+            for (AudioPacket packet : inBuffs) {
+                std::vector<ByteBuffer*> output = decoder.decode(packet);
+                bufferPool.freeBuffer(packet.buffer);
                 for (ByteBuffer* outBuff : output) {
                     player.queueData(outBuff);
                     bufferPool.freeBuffer(outBuff);

@@ -130,7 +130,7 @@ bochan::ByteBuffer* bochan::BochanEncoder::getExtradata() {
     return result;
 }
 
-std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* samples) {
+std::vector<bochan::AudioPacket> bochan::BochanEncoder::encode(ByteBuffer* samples) {
     assert(samples->getUsedSize() == getInputBufferByteSize());
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         BOCHAN_LOG_AV_ERROR("Failed to ensure writable frame: {}", ret);
@@ -186,15 +186,15 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         BOCHAN_LOG_AV_ERROR("Failed to send frame to encoder: {}", ret);
         return {};
     }
-    std::vector<ByteBuffer*> result;
+    std::vector<AudioPacket> result;
     while (true) {
         int ret = avcodec_receive_packet(context, packet);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             break;
         } else if (ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to encode audio frame: {}", ret);
-            for (ByteBuffer* buff : result) {
-                if (!bufferPool->freeAndRemoveBuffer(buff)) {
+            for (AudioPacket audioPacket : result) {
+                if (!bufferPool->freeAndRemoveBuffer(audioPacket.buffer)) {
                     BOCHAN_WARN("Failed to free and remove the sample buffer!");
                 }
             }
@@ -202,7 +202,7 @@ std::vector<bochan::ByteBuffer*> bochan::BochanEncoder::encode(ByteBuffer* sampl
         }
         ByteBuffer* buff = bufferPool->getBuffer(packet->size);
         memcpy(buff->getPointer(), packet->data, packet->size);
-        result.push_back(buff);
+        result.push_back({ buff, packet->pts, packet->dts });
     }
     return result;
 }

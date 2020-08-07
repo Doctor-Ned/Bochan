@@ -22,7 +22,7 @@ namespace bochan {
         int getInputBufferByteSize() const override;
         bool hasExtradata() override;
         ByteBuffer* getExtradata() override;
-        std::vector<ByteBuffer*> encode(ByteBuffer* samples) override;
+        std::vector<AudioPacket> encode(ByteBuffer* samples) override;
     private:
         bool initialized{ false };
         int bytesPerSample{0};
