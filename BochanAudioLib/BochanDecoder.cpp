@@ -184,6 +184,8 @@ void bochan::BochanDecoder::deinitialize() {
         }
         avcodec_free_context(&context);
     }
+    pts = 0;
+    dts = 0;
     saveToFile = false;
     bytesPerSample = 0;
     codec = nullptr;
@@ -213,11 +215,15 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(ByteBuffer* sampl
     while (size) {
         int ret{};
         ret = av_parser_parse2(parser, context, &packet->data, &packet->size,
-                               ptr, static_cast<int>(size), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+                               ptr, static_cast<int>(size), pts, dts, 0);
         if (ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to parse data: {}", ret);
             break;
         }
+        packet->pts = pts;
+        packet->dts = dts;
+        ++dts;
+        pts += ret / CodecUtil::CHANNELS / sizeof(int16_t);
         ptr += ret;
         size -= ret;
         if (packet->size) {

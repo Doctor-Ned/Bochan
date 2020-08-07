@@ -24,6 +24,8 @@ namespace bochan {
     private:
         bool initialized{ false }, saveToFile{ false };
         int bytesPerSample{ 0 };
+        int64_t pts{ 0 };
+        int64_t dts{ 0 };
         AVCodecConfig avCodecConfig{};
         AVCodec* codec{ nullptr };
         AVCodecContext* context{ nullptr };
