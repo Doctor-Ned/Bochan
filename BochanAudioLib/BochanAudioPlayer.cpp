@@ -51,7 +51,7 @@ bool bochan::BochanAudioPlayer::initialize(const char* audioDevice, int sampleRa
         BOCHAN_ERROR("Invalid min/max buffer size ({}/{})!", minBufferSize, maxBufferSize);
         return false;
     }
-    if (devId = SDL_OpenAudioDevice(audioDevice, 0, &wanted, nullptr, 0); devId == 0) {
+    if (devId = SDL_OpenAudioDevice(audioDevice, SDL_FALSE, &wanted, nullptr, 0); devId == 0) {
         if (audioDevice) {
             BOCHAN_ERROR("Failed to open device '{}': {}", audioDevice, SDL_GetError());
         } else {
@@ -130,9 +130,9 @@ void bochan::BochanAudioPlayer::flush() {
 
 std::vector<const char*> bochan::BochanAudioPlayer::getAvailableDevices() const {
     std::vector<const char*> result{};
-    const int DEVICE_COUNT{ SDL_GetNumAudioDevices(0) };
+    const int DEVICE_COUNT{ SDL_GetNumAudioDevices(SDL_FALSE) };
     for (int i = 0; i < DEVICE_COUNT; ++i) {
-        result.push_back(SDL_GetAudioDeviceName(i, 0));
+        result.push_back(SDL_GetAudioDeviceName(i, SDL_FALSE));
     }
     return result;
 }
