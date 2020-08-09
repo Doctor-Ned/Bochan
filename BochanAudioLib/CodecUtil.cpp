@@ -185,3 +185,7 @@ float bochan::CodecUtil::int16ToFloat(int16_t value) {
 int16_t bochan::CodecUtil::floatToInt16(float value) {
     return static_cast<int16_t>(value * 32767.9f);
 }
+
+size_t bochan::CodecUtil::getBytesPerSecond(int sampleRate) {
+    return static_cast<size_t>(sampleRate) * CHANNELS * sizeof(int16_t);
+}

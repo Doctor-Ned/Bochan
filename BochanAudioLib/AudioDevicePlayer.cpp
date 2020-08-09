@@ -1,33 +1,20 @@
 #include "pch.h"
-#include "BochanAudioPlayer.h"
+#include "AudioDevicePlayer.h"
 #include "CodecUtil.h"
+#include "SoundUtil.h"
 
-bochan::BochanAudioPlayer::BochanAudioPlayer() {
-    SDL_InitSubSystem(SDL_INIT_AUDIO);
+bochan::AudioDevicePlayer::AudioDevicePlayer() {
+    SoundUtil::initAudio(this);
 }
 
-bochan::BochanAudioPlayer::~BochanAudioPlayer() {
+bochan::AudioDevicePlayer::~AudioDevicePlayer() {
     if (initialized) {
         deinitialize();
     }
-    SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    SoundUtil::quitAudio(this);
 }
 
-void bochan::BochanAudioPlayer::fillData(void* ptr, Uint8* stream, int len) {
-    BochanAudioPlayer* player{ reinterpret_cast<BochanAudioPlayer*>(ptr) };
-    std::lock_guard lock(player->bufferMutex);
-    if (len > player->sampleBufferPos) {
-        player->stop();
-    } else {
-        memcpy(stream, player->sampleBuffer, len);
-        if (player->sampleBufferPos > len) {
-            memmove(player->sampleBuffer, player->sampleBuffer + len, player->sampleBufferPos - len);
-        }
-        player->sampleBufferPos -= len;
-    }
-}
-
-bool bochan::BochanAudioPlayer::initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) {
+bool bochan::AudioDevicePlayer::initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) {
     if (initialized) {
         deinitialize();
     }
@@ -65,11 +52,11 @@ bool bochan::BochanAudioPlayer::initialize(const char* audioDevice, int sampleRa
     return true;
 }
 
-void bochan::BochanAudioPlayer::deinitialize() {
+void bochan::AudioDevicePlayer::deinitialize() {
     initialized = false;
     if (devId != 0U) {
         if (playing) {
-            SDL_PauseAudioDevice(devId, 1);
+            SDL_PauseAudioDevice(devId, SDL_TRUE);
         }
         playing = false;
         SDL_CloseAudioDevice(devId);
@@ -83,11 +70,11 @@ void bochan::BochanAudioPlayer::deinitialize() {
     sampleBufferPos = 0ULL;
 }
 
-bool bochan::BochanAudioPlayer::isInitialized() const {
+bool bochan::AudioDevicePlayer::isInitialized() const {
     return initialized;
 }
 
-size_t bochan::BochanAudioPlayer::queueData(ByteBuffer* buff) {
+size_t bochan::AudioDevicePlayer::queueData(ByteBuffer* buff) {
     if (!initialized) {
         return 0ULL;
     }
@@ -98,41 +85,57 @@ size_t bochan::BochanAudioPlayer::queueData(ByteBuffer* buff) {
     return queued;
 }
 
-bool bochan::BochanAudioPlayer::isPlaying() {
+bool bochan::AudioDevicePlayer::isPlaying() {
     return playing;
 }
 
-bool bochan::BochanAudioPlayer::play() {
+bool bochan::AudioDevicePlayer::play() {
     if (playing) {
         return true;
     }
     if (initialized && sampleBufferPos >= minBufferSize) {
-        SDL_PauseAudioDevice(devId, 0);
+        BOCHAN_DEBUG("Playback started!");
+        SDL_PauseAudioDevice(devId, SDL_FALSE);
         playing = true;
         return true;
     }
     return false;
 }
 
-void bochan::BochanAudioPlayer::stop() {
+void bochan::AudioDevicePlayer::stop() {
     if (initialized && playing) {
-        SDL_PauseAudioDevice(devId, 1);
+        BOCHAN_DEBUG("Playback stopped!");
+        SDL_PauseAudioDevice(devId, SDL_TRUE);
         playing = false;
     }
 }
 
-void bochan::BochanAudioPlayer::flush() {
+void bochan::AudioDevicePlayer::flush() {
     if (initialized) {
         std::lock_guard lock(bufferMutex);
         sampleBufferPos = 0ULL;
     }
 }
 
-std::vector<const char*> bochan::BochanAudioPlayer::getAvailableDevices() const {
+std::vector<const char*> bochan::AudioDevicePlayer::getAvailableDevices() const {
     std::vector<const char*> result{};
     const int DEVICE_COUNT{ SDL_GetNumAudioDevices(SDL_FALSE) };
     for (int i = 0; i < DEVICE_COUNT; ++i) {
         result.push_back(SDL_GetAudioDeviceName(i, SDL_FALSE));
     }
     return result;
+}
+
+void bochan::AudioDevicePlayer::fillData(void* ptr, Uint8* stream, int len) {
+    AudioDevicePlayer* player{ reinterpret_cast<AudioDevicePlayer*>(ptr) };
+    std::lock_guard lock(player->bufferMutex);
+    if (len > player->sampleBufferPos) {
+        player->stop();
+    } else {
+        memcpy(stream, player->sampleBuffer, len);
+        if (player->sampleBufferPos > len) {
+            memmove(player->sampleBuffer, player->sampleBuffer + len, player->sampleBufferPos - len);
+        }
+        player->sampleBufferPos -= len;
+    }
 }

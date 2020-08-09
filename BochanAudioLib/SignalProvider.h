@@ -17,7 +17,7 @@ namespace bochan {
         SignalProvider(SignalProvider&&) = delete;
         SignalProvider& operator=(SignalProvider&) = delete;
         SignalProvider& operator=(SignalProvider&&) = delete;
-        BOCHANAPI bool initialize(int sampleRate) override;
+        BOCHANAPI bool initialize(int sampleRate);
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
         BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;
@@ -30,6 +30,7 @@ namespace bochan {
         BOCHANAPI void setSimulateTime(bool simulateTime);
         BOCHANAPI bool isSimulatingTime() const;
     private:
+        int sampleRate{ 0 };
         BufferPool* bufferPool{ nullptr };
         double frequency{ 440.0 };
         double amplitude{ 1.0 };

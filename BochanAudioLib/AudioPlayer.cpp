@@ -4,7 +4,7 @@
 
 bool bochan::AudioPlayer::initializeDefault(const char* audioDevice, int sampleRate) {
     this->sampleRate = sampleRate;
-    size_t bytesPerSecond = getBytesPerSecond();
+    size_t bytesPerSecond = CodecUtil::getBytesPerSecond(sampleRate);
     return initialize(audioDevice, sampleRate, bytesPerSecond / 2ULL, bytesPerSecond * 2ULL);
 }
 
@@ -14,8 +14,4 @@ size_t bochan::AudioPlayer::getMinBufferSize() const {
 
 size_t bochan::AudioPlayer::getMaxBufferSize() const {
     return maxBufferSize;
-}
-
-size_t bochan::AudioPlayer::getBytesPerSecond() const {
-    return static_cast<size_t>(sampleRate) * CodecUtil::CHANNELS * sizeof(int16_t);
 }

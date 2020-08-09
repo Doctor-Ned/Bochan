@@ -3,8 +3,10 @@
 #include "BochanEncoder.h"
 #include "BochanDecoder.h"
 #include "CodecUtil.h"
+#include "SoundUtil.h"
 #include "SignalProvider.h"
-#include "BochanAudioPlayer.h"
+#include "AudioDevicePlayer.h"
+#include "AudioDeviceProvider.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -27,15 +29,24 @@ using namespace bochan;
 void bochanProviderPlayer() {
     const CodecConfig CONFIG{ BochanCodec::Opus, 48000, 64000 };
     BufferPool bufferPool(1024 * 1024 * 1024);
-    SignalProvider provider(bufferPool);
-    BochanAudioPlayer player{};
+    std::vector<const char*> DRIVERS = SoundUtil::getAudioDrivers();
+    AudioDevicePlayer player{};
     if (!player.initializeDefault(nullptr, CONFIG.sampleRate)) {
         return;
     }
-    if (!provider.initialize(CONFIG.sampleRate)) {
+    AudioDeviceProvider provider;
+    if (!provider.initialize("Focusrite USB (Focusrite USB Au", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate), true)) {
         return;
     }
-    provider.setAmplitude(0.5);
+    if (!provider.record()) {
+        BOCHAN_ERROR("Failed to start recording!");
+        return;
+    }
+    //SignalProvider provider(bufferPool);
+    //if (!provider.initialize(CONFIG.sampleRate)) {
+    //    return;
+    //}
+    //provider.setAmplitude(0.5);
     BochanEncoder encoder(bufferPool);
     if (!encoder.initialize(CONFIG)) {
         BOCHAN_CRITICAL("Encoder initialization failed!");
@@ -47,11 +58,13 @@ void bochanProviderPlayer() {
         return;
     }
     ByteBuffer* sampleBuff{ bufferPool.getBuffer(encoder.getInputBufferByteSize()) };
-    const int SECONDS = 3;
+    const int SECONDS = 5;
     const bool PLAY_DIRECT = false;
-    int iterations = static_cast<int>(SECONDS * player.getBytesPerSecond() / encoder.getInputBufferByteSize());
+    int iterations = static_cast<int>(SECONDS * CodecUtil::getBytesPerSecond(CONFIG.sampleRate) / encoder.getInputBufferByteSize());
     for (int i = 0; i < iterations; ++i) {
-        provider.fillBuffer(sampleBuff);
+        if (!provider.fillBuffer(sampleBuff)) {
+            continue;
+        }
         if (PLAY_DIRECT) {
             player.queueData(sampleBuff);
         } else {
@@ -66,9 +79,7 @@ void bochanProviderPlayer() {
             }
         }
         if (!player.isPlaying()) {
-            if (player.play()) {
-                BOCHAN_INFO("Playback started!");
-            }
+            player.play();
         }
     }
     player.stop();

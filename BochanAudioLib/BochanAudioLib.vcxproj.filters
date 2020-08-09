@@ -84,9 +84,6 @@
     <ClInclude Include="AudioPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BochanAudioPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SignalProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -97,6 +94,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AudioPacket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioDevicePlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioDeviceProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -158,10 +164,16 @@
     <ClCompile Include="AudioPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BochanAudioPlayer.cpp">
+    <ClCompile Include="SignalProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SignalProvider.cpp">
+    <ClCompile Include="AudioDevicePlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioDeviceProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

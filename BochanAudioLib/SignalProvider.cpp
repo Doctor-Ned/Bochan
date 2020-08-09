@@ -4,7 +4,7 @@
 
 bochan::SignalProvider::SignalProvider(BufferPool& bufferPool) : bufferPool(&bufferPool) {}
 
-bool bochan::SignalProvider::initialize(int sampleRate) {
+BOCHANAPI bool bochan::SignalProvider::initialize(int sampleRate) {
     this->sampleRate = sampleRate;
     return true;
 }

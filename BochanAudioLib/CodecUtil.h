@@ -21,8 +21,8 @@ namespace bochan {
         static const int DEFAULT_SAMPLERATE = 44100;
         static const AVSampleFormat DEFAULT_SAMPLEFORMAT = AVSampleFormat::AV_SAMPLE_FMT_FLTP;
         static const int DEFAULT_FRAMESIZE = 4096;
-        static const uint64_t CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO;
         static const int CHANNELS = 2;
+        static const uint64_t CHANNEL_LAYOUT = CHANNELS == 1 ? AV_CH_LAYOUT_MONO : AV_CH_LAYOUT_STEREO;
         CodecUtil() = delete;
         BOCHANAPI static void initialiseAvLog();
         BOCHANAPI static bool isFormatSupported(const AVCodec* codec, const AVSampleFormat format);
@@ -38,6 +38,7 @@ namespace bochan {
         BOCHANAPI static void floatToInt16(float* from, size_t count, int16_t* to);
         BOCHANAPI static float int16ToFloat(int16_t value);
         BOCHANAPI static int16_t floatToInt16(float value);
+        BOCHANAPI static size_t getBytesPerSecond(int sampleRate);
     private:
         static std::map<BochanCodec, AVCodecConfig> codecAvConfigMap;
     };

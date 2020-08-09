@@ -19,7 +19,6 @@ namespace bochan {
         virtual std::vector<const char*> getAvailableDevices() const = 0;
         size_t getMinBufferSize() const;
         size_t getMaxBufferSize() const;
-        size_t getBytesPerSecond() const;
     protected:
         int sampleRate{ 0 };
         size_t minBufferSize{ 0ULL }, maxBufferSize{ 0ULL };
