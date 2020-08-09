@@ -60,19 +60,23 @@ void bochanProviderPlayer() {
     ByteBuffer* sampleBuff{ bufferPool.getBuffer(encoder.getInputBufferByteSize()) };
     const int SECONDS = 5;
     const bool PLAY_DIRECT = false;
+    size_t in{ 0 }, mid{ 0 }, out{ 0 };
     int iterations = static_cast<int>(SECONDS * CodecUtil::getBytesPerSecond(CONFIG.sampleRate) / encoder.getInputBufferByteSize());
     for (int i = 0; i < iterations; ++i) {
         if (!provider.fillBuffer(sampleBuff)) {
             continue;
         }
+        in += sampleBuff->getUsedSize();
         if (PLAY_DIRECT) {
             player.queueData(sampleBuff);
         } else {
             std::vector<AudioPacket> inBuffs = encoder.encode(sampleBuff);
             for (AudioPacket packet : inBuffs) {
+                mid += packet.buffer->getUsedSize();
                 std::vector<ByteBuffer*> output = decoder.decode(packet);
                 bufferPool.freeBuffer(packet.buffer);
                 for (ByteBuffer* outBuff : output) {
+                    out += outBuff->getUsedSize();
                     player.queueData(outBuff);
                     bufferPool.freeBuffer(outBuff);
                 }
@@ -82,6 +86,7 @@ void bochanProviderPlayer() {
             player.play();
         }
     }
+    BOCHAN_INFO("IN: {} | MID: {} | OUT: {}", in, mid, out);
     player.stop();
     bufferPool.freeBuffer(sampleBuff);
 }
