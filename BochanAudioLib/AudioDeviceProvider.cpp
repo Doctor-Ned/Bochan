@@ -163,8 +163,7 @@ void bochan::AudioDeviceProvider::audioCallback(void* ptr, Uint8* stream, int le
         int16_t* buffPtr = reinterpret_cast<int16_t*>(provider->sampleBuffer + provider->sampleBufferPos);
         for (int i = 0; i < samples; ++i) {
             for (int j = 0; j < CHANNELS; ++j) {
-                *buffPtr = streamPtr[i];
-                ++buffPtr;
+                buffPtr[i * CHANNELS + j] = streamPtr[i];
             }
         }
         provider->sampleBufferPos += CHANNELS * len;
