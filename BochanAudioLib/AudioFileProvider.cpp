@@ -165,6 +165,7 @@ bool bochan::AudioFileProvider::fillBuffer(ByteBuffer* buff) {
             }
         } else {
             if (!readFrame()) {
+                BOCHAN_ERROR("Failed to read frame!");
                 return false;
             }
         }
@@ -213,12 +214,15 @@ bool bochan::AudioFileProvider::readFrame() {
         } else {
             std::lock_guard lock(bufferMutex);
             size_t remaining = bufferSize - bufferPos;
-            if (remaining < resampledFrame->linesize[0]) {
-                size_t toFree = resampledFrame->linesize[0] - remaining;
+            //size_t linesize = av_samples_get_buffer_size(resampledFrame->linesize, resampledFrame->channels, resampledFrame->nb_samples, static_cast<AVSampleFormat>(resampledFrame->format), 0);
+            size_t linesize = resampledFrame->nb_samples * resampledFrame->channels * sizeof(int16_t);
+            if (remaining < linesize) {
+                size_t toFree = linesize - remaining;
+                BOCHAN_WARN("Buffer overflow! Needed {} bytes, got {}/{}. Truncating {} bytes...", linesize, remaining, bufferSize, toFree);
                 reduceBuffer(toFree);
             }
-            memcpy(internalBuffer + bufferPos, resampledFrame->extended_data[0], resampledFrame->linesize[0]);
-            bufferPos += resampledFrame->linesize[0];
+            memcpy(internalBuffer + bufferPos, resampledFrame->extended_data[0], linesize);
+            bufferPos += linesize;
         }
         av_frame_unref(resampledFrame);
         av_frame_unref(frame);
