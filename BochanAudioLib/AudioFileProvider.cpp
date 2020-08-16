@@ -187,7 +187,11 @@ bool bochan::AudioFileProvider::readFrame() {
         return false;
     }
     if (int ret = av_read_frame(formatContext, packet); ret < 0 && packet->buf == nullptr) {
-        BOCHAN_LOG_AV_ERROR("Failed to read frame: {}", ret);
+        if (ret == AVERROR_EOF) {
+            BOCHAN_DEBUG("Frame read aborted: reached EOF!");
+        } else {
+            BOCHAN_LOG_AV_ERROR("Failed to read frame: {}", ret);
+        }
         return false;
     }
     if (int ret = avcodec_send_packet(context, packet); ret < 0) {
