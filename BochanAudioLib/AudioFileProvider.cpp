@@ -209,6 +209,10 @@ bool bochan::AudioFileProvider::readFrame() {
         resampledFrame->sample_rate = sampleRate;
         resampledFrame->format = AV_SAMPLE_FMT_S16;
 
+        if (frame->channel_layout == 0) {
+            frame->channel_layout = av_get_default_channel_layout(frame->channels);
+        }
+
         if (ret = swr_convert_frame(swrContext, resampledFrame, frame); ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to resample frame: {}", ret);
         } else {
