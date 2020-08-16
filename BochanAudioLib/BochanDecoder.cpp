@@ -87,7 +87,7 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, bool saveToFil
     context->request_sample_fmt = avCodecConfig.sampleFormat;
     context->bit_rate = config.bitRate;
     context->sample_rate = config.sampleRate;
-    context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
+    context->channel_layout = av_get_default_channel_layout(CodecUtil::CHANNELS);
     context->channels = CodecUtil::CHANNELS;
     // context->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL; // might allow experimental AAC codec?
     stream->time_base.den = context->sample_rate;

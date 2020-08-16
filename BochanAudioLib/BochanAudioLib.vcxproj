@@ -97,6 +97,7 @@
     <ClInclude Include="AudioCoder.h" />
     <ClInclude Include="AudioDecoder.h" />
     <ClInclude Include="AudioEncoder.h" />
+    <ClInclude Include="AudioFileProvider.h" />
     <ClInclude Include="AudioPacket.h" />
     <ClInclude Include="AudioPlayer.h" />
     <ClInclude Include="AudioProvider.h" />
@@ -129,6 +130,7 @@
     <ClCompile Include="AudioCoder.cpp" />
     <ClCompile Include="AudioDecoder.cpp" />
     <ClCompile Include="AudioEncoder.cpp" />
+    <ClCompile Include="AudioFileProvider.cpp" />
     <ClCompile Include="AudioPlayer.cpp" />
     <ClCompile Include="AudioDevicePlayer.cpp" />
     <ClCompile Include="BochanDecoder.cpp" />

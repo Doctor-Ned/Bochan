@@ -105,6 +105,9 @@
     <ClInclude Include="SoundUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AudioFileProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -174,6 +177,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SoundUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioFileProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,6 +6,7 @@
 #include "SoundUtil.h"
 #include "SignalProvider.h"
 #include "AudioDevicePlayer.h"
+#include "AudioFileProvider.h"
 #include "AudioDeviceProvider.h"
 
 #include <cstdio>
@@ -34,14 +35,19 @@ void bochanProviderPlayer() {
     if (!player.initializeDefault(nullptr, CONFIG.sampleRate)) {
         return;
     }
-    AudioDeviceProvider provider;
-    if (!provider.initialize("Focusrite USB (Focusrite USB Au", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate), true)) {
+    AudioFileProvider provider;
+    if (!provider.initialize("spanish_flea.flac", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate))) {
         return;
     }
-    if (!provider.record()) {
-        BOCHAN_ERROR("Failed to start recording!");
-        return;
-    }
+    //AudioDeviceProvider provider;
+    //if (!provider.initialize("Focusrite USB (Focusrite USB Au", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate), true)) {
+    //    return;
+    //}
+    //if (!provider.record()) {
+    //    BOCHAN_ERROR("Failed to start recording!");
+    //    return;
+    //}
+
     //SignalProvider provider(bufferPool);
     //if (!provider.initialize(CONFIG.sampleRate)) {
     //    return;

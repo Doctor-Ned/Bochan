@@ -48,7 +48,7 @@ bool bochan::BochanEncoder::initialize(const CodecConfig& config) {
     context->sample_fmt = avCodecConfig.sampleFormat;
     context->bit_rate = config.bitRate;
     context->sample_rate = config.sampleRate;
-    context->channel_layout = CodecUtil::CHANNEL_LAYOUT;
+    context->channel_layout = av_get_default_channel_layout(CodecUtil::CHANNELS);
     context->channels = CodecUtil::CHANNELS;
     if (int ret = avcodec_open2(context, codec, nullptr); ret < 0) {
         BOCHAN_LOG_AV_ERROR("Failed to open codec: {}", ret);

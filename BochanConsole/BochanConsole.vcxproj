@@ -71,7 +71,8 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(SolutionDir)thirdparty\ffmpeg\dll\*.dll" "$(TargetDir)"
-xcopy /Y "$(SolutionDir)thirdparty\sdl\dll\*.dll" "$(TargetDir)"</Command>
+xcopy /Y "$(SolutionDir)thirdparty\sdl\dll\*.dll" "$(TargetDir)"
+xcopy /Y "$(SolutionDir)spanish_flea.*" "$(TargetDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying DLLs...</Message>
