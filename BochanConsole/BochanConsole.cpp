@@ -68,8 +68,17 @@ void bochanProviderPlayer() {
     const bool PLAY_DIRECT = false;
     size_t in{ 0 }, mid{ 0 }, out{ 0 };
     int iterations = static_cast<int>(SECONDS * CodecUtil::getBytesPerSecond(CONFIG.sampleRate) / encoder.getInputBufferByteSize());
+    bool rewind = true;
+    provider.setPositionSeconds(118.0);
     for (int i = 0; i < iterations; ++i) {
         if (!provider.fillBuffer(sampleBuff)) {
+            if (provider.isEof()) {
+                if (rewind) {
+                    provider.rewindToStart();
+                } else {
+                    break;
+                }
+            }
             continue;
         }
         in += sampleBuff->getUsedSize();

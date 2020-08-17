@@ -93,6 +93,7 @@ bool bochan::AudioFileProvider::initialize(const char* fileName, int sampleRate,
         return false;
     }
 
+    bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
     internalBuffer = new uint8_t[bufferSize];
     bufferPos = 0ULL;
 
@@ -128,6 +129,7 @@ void bochan::AudioFileProvider::deinitialize() {
     delete[] internalBuffer;
     bufferSize = 0ULL;
     bufferPos = 0ULL;
+    bytesPerSample = 0;
 }
 
 bool bochan::AudioFileProvider::isInitialized() const {
@@ -153,7 +155,6 @@ bool bochan::AudioFileProvider::fillBuffer(ByteBuffer* buff) {
     size_t remaining = buff->getUsedSize();
     while (remaining) {
         if (bufferPos) {
-            std::lock_guard lock(bufferMutex);
             size_t read = min(remaining, bufferPos);
             memcpy(ptr, internalBuffer, read);
             remaining -= read;
@@ -164,8 +165,13 @@ bool bochan::AudioFileProvider::fillBuffer(ByteBuffer* buff) {
                 reduceBuffer(read);
             }
         } else {
+            std::lock_guard lock(formatMutex);
             if (!readFrame()) {
-                BOCHAN_ERROR("Failed to read frame!");
+                if (eof) {
+                    BOCHAN_INFO("Reached EOF, returning!");
+                } else {
+                    BOCHAN_ERROR("Failed to read frame!");
+                }
                 return false;
             }
         }
@@ -182,6 +188,81 @@ void bochan::AudioFileProvider::setSimulateTime(bool simulateTime) {
     startPointAvailable = false;
 }
 
+double bochan::AudioFileProvider::getDuration() {
+    if (!initialized) {
+        return -1.0;
+    }
+    return static_cast<double>(formatContext->duration) / AV_TIME_BASE;
+}
+
+double bochan::AudioFileProvider::getPositionSeconds() {
+    if (!initialized) {
+        return -1.0;
+    }
+    return static_cast<double>(formatContext->streams[streamId]->cur_dts) * formatContext->streams[streamId]->time_base.num / formatContext->streams[streamId]->time_base.den;
+}
+
+bool bochan::AudioFileProvider::setPositionSeconds(double position) {
+    if (!initialized) {
+        return false;
+    }
+    std::lock_guard lock(formatMutex);
+    eof = false;
+    int64_t targetPos = position * formatContext->streams[streamId]->time_base.den / formatContext->streams[streamId]->time_base.num;
+    if (!seekPos(0, targetPos, targetPos)) {
+        BOCHAN_ERROR("Failed to seek frame at position {} ({})!", position, targetPos);
+        return false;
+    }
+    return true;
+}
+
+bool bochan::AudioFileProvider::rewindForward(double seconds) {
+    if (!initialized) {
+        return false;
+    }
+    std::lock_guard lock(formatMutex);
+    eof = false;
+    int64_t targetPos = formatContext->streams[streamId]->cur_dts + static_cast<int64_t>(seconds * formatContext->streams[streamId]->time_base.den / formatContext->streams[streamId]->time_base.num);
+    if (!seekPos(0, targetPos, targetPos)) {
+        BOCHAN_ERROR("Failed to seek frame by position {} (to {})!", seconds, targetPos);
+        return false;
+    }
+    return true;
+}
+
+bool bochan::AudioFileProvider::rewindBackward(double seconds) {
+    return rewindForward(-seconds);
+}
+
+bool bochan::AudioFileProvider::rewindToStart() {
+    if (!initialized) {
+        return false;
+    }
+    if (!seekPos(0, 0, 0)) {
+        BOCHAN_ERROR("Failed to rewind to start!");
+        return false;
+    }
+    return true;
+}
+
+bool bochan::AudioFileProvider::isEof() {
+    return eof;
+}
+
+bool bochan::AudioFileProvider::seekPos(int64_t minPos, int64_t pos, int64_t maxPos) {
+    if (!initialized) {
+        return false;
+    }
+    std::lock_guard lock(formatMutex);
+    if (int ret = avformat_seek_file(formatContext, streamId, minPos, pos, maxPos, 0); ret < 0) {
+        BOCHAN_LOG_AV_ERROR("Failed to seek: {}", ret);
+        return false;
+    }
+    avcodec_flush_buffers(context);
+    eof = false;
+    return true;
+}
+
 bool bochan::AudioFileProvider::readFrame() {
     if (!initialized) {
         return false;
@@ -189,6 +270,7 @@ bool bochan::AudioFileProvider::readFrame() {
     if (int ret = av_read_frame(formatContext, packet); ret < 0 && packet->buf == nullptr) {
         if (ret == AVERROR_EOF) {
             BOCHAN_DEBUG("Frame read aborted: reached EOF!");
+            eof = true;
         } else {
             BOCHAN_LOG_AV_ERROR("Failed to read frame: {}", ret);
         }
@@ -220,7 +302,6 @@ bool bochan::AudioFileProvider::readFrame() {
         if (ret = swr_convert_frame(swrContext, resampledFrame, frame); ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to resample frame: {}", ret);
         } else {
-            std::lock_guard lock(bufferMutex);
             size_t remaining = bufferSize - bufferPos;
             //size_t linesize = av_samples_get_buffer_size(resampledFrame->linesize, resampledFrame->channels, resampledFrame->nb_samples, static_cast<AVSampleFormat>(resampledFrame->format), 0);
             size_t linesize = resampledFrame->nb_samples * resampledFrame->channels * sizeof(int16_t);
@@ -240,7 +321,6 @@ bool bochan::AudioFileProvider::readFrame() {
 
 void bochan::AudioFileProvider::reduceBuffer(size_t size) {
     assert(bufferPos >= size);
-    std::lock_guard lock(bufferMutex);
     if (bufferPos > size) {
         memmove(internalBuffer, internalBuffer + size, bufferPos - size);
     }

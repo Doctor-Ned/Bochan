@@ -20,17 +20,27 @@ namespace bochan {
         BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;
         BOCHANAPI bool isSimulatingTime() const;
         BOCHANAPI void setSimulateTime(bool simulateTime);
+        BOCHANAPI double getDuration();
+        BOCHANAPI double getPositionSeconds();
+        BOCHANAPI bool setPositionSeconds(double position);
+        BOCHANAPI bool rewindForward(double seconds);
+        BOCHANAPI bool rewindBackward(double seconds);
+        BOCHANAPI bool rewindToStart();
+        BOCHANAPI bool isEof();
     private:
+        BOCHANAPI bool seekPos(int64_t minPos, int64_t pos, int64_t maxPos);
         BOCHANAPI bool readFrame();
         BOCHANAPI void reduceBuffer(size_t size);
         bool initialized{ false };
         const char* fileName{ nullptr };
         int sampleRate{ 0 }, streamId{ -1 };
         bool startPointAvailable{ false }, simulateTime{ true };
+        std::atomic_bool eof{ false };
         std::chrono::system_clock::time_point startPoint{};
         size_t bufferSize{ 0ULL }, bufferPos{ 0ULL };
+        int bytesPerSample{ 0 };
         uint8_t* internalBuffer{ nullptr };
-        std::recursive_mutex bufferMutex{};
+        std::recursive_mutex formatMutex{};
         AVPacket* packet{ nullptr };
         AVFrame* frame{ nullptr }, * resampledFrame{ nullptr };
         AVFormatContext* formatContext{ nullptr };
