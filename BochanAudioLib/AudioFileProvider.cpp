@@ -98,6 +98,12 @@ bool bochan::AudioFileProvider::initialize(const char* fileName, int sampleRate,
     bufferPos = 0ULL;
 
     initialized = true;
+
+    if (!rewindToStart()) {
+        BOCHAN_ERROR("Failed to initially rewind to start: deinitializing!");
+        deinitialize();
+        return false;
+    }
     return true;
 }
 
@@ -206,10 +212,17 @@ bool bochan::AudioFileProvider::setPositionSeconds(double position) {
     if (!initialized) {
         return false;
     }
+    if (position <= 0.0) {
+        return rewindToStart();
+    }
+    double duration = getDuration();
+    if (position > duration) {
+        position = duration;
+    }
     std::lock_guard lock(formatMutex);
     eof = false;
-    int64_t targetPos = position * formatContext->streams[streamId]->time_base.den / formatContext->streams[streamId]->time_base.num;
-    if (!seekPos(0, targetPos, targetPos)) {
+    int64_t targetPos = static_cast<int64_t>(position * formatContext->streams[streamId]->time_base.den / formatContext->streams[streamId]->time_base.num);
+    if (!seekPos(0, targetPos, INT64_MAX)) {
         BOCHAN_ERROR("Failed to seek frame at position {} ({})!", position, targetPos);
         return false;
     }
@@ -223,7 +236,7 @@ bool bochan::AudioFileProvider::rewindForward(double seconds) {
     std::lock_guard lock(formatMutex);
     eof = false;
     int64_t targetPos = formatContext->streams[streamId]->cur_dts + static_cast<int64_t>(seconds * formatContext->streams[streamId]->time_base.den / formatContext->streams[streamId]->time_base.num);
-    if (!seekPos(0, targetPos, targetPos)) {
+    if (!seekPos(0, targetPos, INT64_MAX)) {
         BOCHAN_ERROR("Failed to seek frame by position {} (to {})!", seconds, targetPos);
         return false;
     }
@@ -264,9 +277,6 @@ bool bochan::AudioFileProvider::seekPos(int64_t minPos, int64_t pos, int64_t max
 }
 
 bool bochan::AudioFileProvider::readFrame() {
-    if (!initialized) {
-        return false;
-    }
     if (int ret = av_read_frame(formatContext, packet); ret < 0 && packet->buf == nullptr) {
         if (ret == AVERROR_EOF) {
             BOCHAN_DEBUG("Frame read aborted: reached EOF!");
