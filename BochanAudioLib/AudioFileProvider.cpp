@@ -304,7 +304,7 @@ bool bochan::AudioFileProvider::readFrame() {
         } else {
             size_t remaining = bufferSize - bufferPos;
             //size_t linesize = av_samples_get_buffer_size(resampledFrame->linesize, resampledFrame->channels, resampledFrame->nb_samples, static_cast<AVSampleFormat>(resampledFrame->format), 0);
-            size_t linesize = resampledFrame->nb_samples * resampledFrame->channels * sizeof(int16_t);
+            size_t linesize = sizeof(int16_t) * resampledFrame->nb_samples * resampledFrame->channels;
             if (remaining < linesize) {
                 size_t toFree = linesize - remaining;
                 BOCHAN_WARN("Buffer overflow! Needed {} bytes, got {}/{}. Truncating {} bytes...", linesize, remaining, bufferSize, toFree);

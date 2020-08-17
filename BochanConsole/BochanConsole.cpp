@@ -36,7 +36,7 @@ void bochanProviderPlayer() {
         return;
     }
     AudioFileProvider provider;
-    if (!provider.initialize("spanish_flea.flac", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate))) {
+    if (!provider.initialize("TestSounds/spanish_flea.flac", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate))) {
         return;
     }
     //AudioDeviceProvider provider;
