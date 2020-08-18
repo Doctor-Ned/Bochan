@@ -5,14 +5,14 @@
 #include "SDL.h"
 
 namespace bochan {
-    class AudioDevicePlayer sealed : public AudioPlayer {
+    class SDLAudioPlayer sealed : public AudioPlayer {
     public:
-        BOCHANAPI AudioDevicePlayer();
-        BOCHANAPI ~AudioDevicePlayer();
-        AudioDevicePlayer(AudioDevicePlayer&) = delete;
-        AudioDevicePlayer(AudioDevicePlayer&&) = delete;
-        AudioDevicePlayer& operator=(AudioDevicePlayer&) = delete;
-        AudioDevicePlayer& operator=(AudioDevicePlayer&&) = delete;
+        BOCHANAPI SDLAudioPlayer();
+        BOCHANAPI ~SDLAudioPlayer();
+        SDLAudioPlayer(SDLAudioPlayer&) = delete;
+        SDLAudioPlayer(SDLAudioPlayer&&) = delete;
+        SDLAudioPlayer& operator=(SDLAudioPlayer&) = delete;
+        SDLAudioPlayer& operator=(SDLAudioPlayer&&) = delete;
         BOCHANAPI bool initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) override;
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;

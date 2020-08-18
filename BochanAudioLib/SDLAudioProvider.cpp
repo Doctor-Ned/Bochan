@@ -1,20 +1,20 @@
 #include "pch.h"
-#include "AudioDeviceProvider.h"
+#include "SDLAudioProvider.h"
 #include "CodecUtil.h"
-#include "SoundUtil.h"
+#include "SDLUtil.h"
 
-bochan::AudioDeviceProvider::AudioDeviceProvider() {
-    SoundUtil::initAudio(this);
+bochan::SDLAudioProvider::SDLAudioProvider() {
+    SDLUtil::initAudio(this);
 }
 
-bochan::AudioDeviceProvider::~AudioDeviceProvider() {
+bochan::SDLAudioProvider::~SDLAudioProvider() {
     if (initialized) {
         deinitialize();
     }
-    SoundUtil::quitAudio(this);
+    SDLUtil::quitAudio(this);
 }
 
-bool bochan::AudioDeviceProvider::initialize(const char* audioDevice, int sampleRate, size_t bufferSize, bool forceMono) {
+bool bochan::SDLAudioProvider::initialize(const char* audioDevice, int sampleRate, size_t bufferSize, bool forceMono) {
     if (initialized) {
         deinitialize();
     }
@@ -48,7 +48,7 @@ bool bochan::AudioDeviceProvider::initialize(const char* audioDevice, int sample
     return true;
 }
 
-void bochan::AudioDeviceProvider::deinitialize() {
+void bochan::SDLAudioProvider::deinitialize() {
     initialized = false;
     if (devId != 0U) {
         if (recording) {
@@ -67,15 +67,15 @@ void bochan::AudioDeviceProvider::deinitialize() {
     sampleBufferPos = 0ULL;
 }
 
-bool bochan::AudioDeviceProvider::isInitialized() const {
+bool bochan::SDLAudioProvider::isInitialized() const {
     return initialized;
 }
 
-bool bochan::AudioDeviceProvider::isRecording() const {
+bool bochan::SDLAudioProvider::isRecording() const {
     return recording;
 }
 
-bool bochan::AudioDeviceProvider::record() {
+bool bochan::SDLAudioProvider::record() {
     if (recording) {
         return true;
     }
@@ -87,21 +87,21 @@ bool bochan::AudioDeviceProvider::record() {
     return false;
 }
 
-void bochan::AudioDeviceProvider::stop() {
+void bochan::SDLAudioProvider::stop() {
     if (initialized && recording) {
         SDL_PauseAudioDevice(devId, SDL_TRUE);
         recording = false;
     }
 }
 
-void bochan::AudioDeviceProvider::flush() {
+void bochan::SDLAudioProvider::flush() {
     if (initialized) {
         std::lock_guard lock(bufferMutex);
         sampleBufferPos = 0ULL;
     }
 }
 
-bool bochan::AudioDeviceProvider::fillBuffer(ByteBuffer* buff) {
+bool bochan::SDLAudioProvider::fillBuffer(ByteBuffer* buff) {
     uint8_t* ptr = buff->getPointer();
     size_t remaining = buff->getUsedSize();
     if (!recording) {
@@ -131,7 +131,7 @@ bool bochan::AudioDeviceProvider::fillBuffer(ByteBuffer* buff) {
     return true;
 }
 
-std::vector<const char*> bochan::AudioDeviceProvider::getAvailableDevices() const {
+std::vector<const char*> bochan::SDLAudioProvider::getAvailableDevices() const {
     std::vector<const char*> result{};
     const int DEVICE_COUNT{ SDL_GetNumAudioDevices(SDL_TRUE) };
     for (int i = 0; i < DEVICE_COUNT; ++i) {
@@ -140,7 +140,7 @@ std::vector<const char*> bochan::AudioDeviceProvider::getAvailableDevices() cons
     return result;
 }
 
-void bochan::AudioDeviceProvider::reduceBuffer(size_t size) {
+void bochan::SDLAudioProvider::reduceBuffer(size_t size) {
     assert(sampleBufferPos >= size);
     std::lock_guard lock(bufferMutex);
     if (sampleBufferPos > size) {
@@ -149,8 +149,8 @@ void bochan::AudioDeviceProvider::reduceBuffer(size_t size) {
     sampleBufferPos -= size;
 }
 
-void bochan::AudioDeviceProvider::audioCallback(void* ptr, Uint8* stream, int len) {
-    AudioDeviceProvider* provider = reinterpret_cast<AudioDeviceProvider*>(ptr);
+void bochan::SDLAudioProvider::audioCallback(void* ptr, Uint8* stream, int len) {
+    SDLAudioProvider* provider = reinterpret_cast<SDLAudioProvider*>(ptr);
     std::lock_guard lock(provider->bufferMutex);
     const size_t CHANNELS = CodecUtil::CHANNELS;
     if (provider->forceMono && CHANNELS != 1) {

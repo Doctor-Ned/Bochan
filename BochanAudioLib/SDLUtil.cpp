@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "SoundUtil.h"
+#include "SDLUtil.h"
 
-const char* bochan::SoundUtil::AUDIO_DRIVER{ "directsound" };
-std::vector<void*> bochan::SoundUtil::audioInvokers{};
+const char* bochan::SDLUtil::AUDIO_DRIVER{ "directsound" };
+std::vector<void*> bochan::SDLUtil::audioInvokers{};
 
-bool bochan::SoundUtil::initAudio(void* owner) {
+bool bochan::SDLUtil::initAudio(void* owner) {
     if (audioInvokers.empty()) {
         BOCHAN_DEBUG("Initializing SDL audio with driver '{}'...", AUDIO_DRIVER);
         if (SDL_InitSubSystem(SDL_INIT_AUDIO)) {
@@ -22,7 +22,7 @@ bool bochan::SoundUtil::initAudio(void* owner) {
     return true;
 }
 
-void bochan::SoundUtil::quitAudio(void* owner) {
+void bochan::SDLUtil::quitAudio(void* owner) {
     std::vector<void*>::iterator it{ std::find(audioInvokers.begin(), audioInvokers.end(), owner) };
     if (it != audioInvokers.end()) {
         audioInvokers.erase(it);
@@ -34,7 +34,7 @@ void bochan::SoundUtil::quitAudio(void* owner) {
     }
 }
 
-std::vector<const char*> bochan::SoundUtil::getAudioDrivers() {
+std::vector<const char*> bochan::SDLUtil::getAudioDrivers() {
     std::vector<const char*> result{};
     const int DRIVERS = SDL_GetNumAudioDrivers();
     for (int i = 0; i < DRIVERS; ++i) {

@@ -3,11 +3,11 @@
 #include "BochanEncoder.h"
 #include "BochanDecoder.h"
 #include "CodecUtil.h"
-#include "SoundUtil.h"
+#include "SDLUtil.h"
 #include "SignalProvider.h"
-#include "AudioDevicePlayer.h"
+#include "SDLAudioPlayer.h"
 #include "AudioFileProvider.h"
-#include "AudioDeviceProvider.h"
+#include "SDLAudioProvider.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -30,8 +30,8 @@ using namespace bochan;
 void bochanProviderPlayer() {
     const CodecConfig CONFIG{ BochanCodec::Opus, 48000, 64000 };
     BufferPool bufferPool(1024 * 1024 * 1024);
-    std::vector<const char*> DRIVERS = SoundUtil::getAudioDrivers();
-    AudioDevicePlayer player{};
+    std::vector<const char*> DRIVERS = SDLUtil::getAudioDrivers();
+    SDLAudioPlayer player{};
     if (!player.initializeDefault(nullptr, CONFIG.sampleRate)) {
         return;
     }
@@ -39,7 +39,7 @@ void bochanProviderPlayer() {
     if (!provider.initialize("TestSounds/spanish_flea.flac", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate))) {
         return;
     }
-    //AudioDeviceProvider provider;
+    //SDLAudioProvider provider;
     //if (!provider.initialize("Focusrite USB (Focusrite USB Au", CONFIG.sampleRate, CodecUtil::getBytesPerSecond(CONFIG.sampleRate), true)) {
     //    return;
     //}

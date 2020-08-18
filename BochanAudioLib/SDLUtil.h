@@ -4,9 +4,9 @@
 #include "SDL.h"
 
 namespace bochan {
-    class SoundUtil sealed {
+    class SDLUtil sealed {
     public:
-        SoundUtil() = delete;
+        SDLUtil() = delete;
         BOCHANAPI static bool initAudio(void* owner);
         BOCHANAPI static void quitAudio(void* owner);
         BOCHANAPI static std::vector<const char*> getAudioDrivers();

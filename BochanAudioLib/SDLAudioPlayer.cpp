@@ -1,20 +1,20 @@
 #include "pch.h"
-#include "AudioDevicePlayer.h"
+#include "SDLAudioPlayer.h"
 #include "CodecUtil.h"
-#include "SoundUtil.h"
+#include "SDLUtil.h"
 
-bochan::AudioDevicePlayer::AudioDevicePlayer() {
-    SoundUtil::initAudio(this);
+bochan::SDLAudioPlayer::SDLAudioPlayer() {
+    SDLUtil::initAudio(this);
 }
 
-bochan::AudioDevicePlayer::~AudioDevicePlayer() {
+bochan::SDLAudioPlayer::~SDLAudioPlayer() {
     if (initialized) {
         deinitialize();
     }
-    SoundUtil::quitAudio(this);
+    SDLUtil::quitAudio(this);
 }
 
-bool bochan::AudioDevicePlayer::initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) {
+bool bochan::SDLAudioPlayer::initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) {
     if (initialized) {
         deinitialize();
     }
@@ -52,7 +52,7 @@ bool bochan::AudioDevicePlayer::initialize(const char* audioDevice, int sampleRa
     return true;
 }
 
-void bochan::AudioDevicePlayer::deinitialize() {
+void bochan::SDLAudioPlayer::deinitialize() {
     initialized = false;
     if (devId != 0U) {
         if (playing) {
@@ -70,11 +70,11 @@ void bochan::AudioDevicePlayer::deinitialize() {
     sampleBufferPos = 0ULL;
 }
 
-bool bochan::AudioDevicePlayer::isInitialized() const {
+bool bochan::SDLAudioPlayer::isInitialized() const {
     return initialized;
 }
 
-size_t bochan::AudioDevicePlayer::queueData(ByteBuffer* buff) {
+size_t bochan::SDLAudioPlayer::queueData(ByteBuffer* buff) {
     if (!initialized) {
         return 0ULL;
     }
@@ -85,11 +85,11 @@ size_t bochan::AudioDevicePlayer::queueData(ByteBuffer* buff) {
     return queued;
 }
 
-bool bochan::AudioDevicePlayer::isPlaying() {
+bool bochan::SDLAudioPlayer::isPlaying() {
     return playing;
 }
 
-bool bochan::AudioDevicePlayer::play() {
+bool bochan::SDLAudioPlayer::play() {
     if (playing) {
         return true;
     }
@@ -102,7 +102,7 @@ bool bochan::AudioDevicePlayer::play() {
     return false;
 }
 
-void bochan::AudioDevicePlayer::stop() {
+void bochan::SDLAudioPlayer::stop() {
     if (initialized && playing) {
         BOCHAN_DEBUG("Playback stopped!");
         SDL_PauseAudioDevice(devId, SDL_TRUE);
@@ -110,14 +110,14 @@ void bochan::AudioDevicePlayer::stop() {
     }
 }
 
-void bochan::AudioDevicePlayer::flush() {
+void bochan::SDLAudioPlayer::flush() {
     if (initialized) {
         std::lock_guard lock(bufferMutex);
         sampleBufferPos = 0ULL;
     }
 }
 
-std::vector<const char*> bochan::AudioDevicePlayer::getAvailableDevices() const {
+std::vector<const char*> bochan::SDLAudioPlayer::getAvailableDevices() const {
     std::vector<const char*> result{};
     const int DEVICE_COUNT{ SDL_GetNumAudioDevices(SDL_FALSE) };
     for (int i = 0; i < DEVICE_COUNT; ++i) {
@@ -126,8 +126,8 @@ std::vector<const char*> bochan::AudioDevicePlayer::getAvailableDevices() const 
     return result;
 }
 
-void bochan::AudioDevicePlayer::fillData(void* ptr, Uint8* stream, int len) {
-    AudioDevicePlayer* player{ reinterpret_cast<AudioDevicePlayer*>(ptr) };
+void bochan::SDLAudioPlayer::fillData(void* ptr, Uint8* stream, int len) {
+    SDLAudioPlayer* player{ reinterpret_cast<SDLAudioPlayer*>(ptr) };
     std::lock_guard lock(player->bufferMutex);
     if (len > player->sampleBufferPos) {
         player->stop();

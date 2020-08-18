@@ -5,10 +5,10 @@
 #include "SDL.h"
 
 namespace bochan {
-    class AudioDeviceProvider sealed : public AudioProvider {
+    class SDLAudioProvider sealed : public AudioProvider {
     public:
-        BOCHANAPI AudioDeviceProvider();
-        BOCHANAPI ~AudioDeviceProvider();
+        BOCHANAPI SDLAudioProvider();
+        BOCHANAPI ~SDLAudioProvider();
         BOCHANAPI bool initialize(const char* audioDevice, int sampleRate, size_t bufferSize, bool forceMono);
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;

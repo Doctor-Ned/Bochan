@@ -54,9 +54,6 @@
     <ClInclude Include="BochanDecoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BochanThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -96,16 +93,19 @@
     <ClInclude Include="AudioPacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AudioDevicePlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioDeviceProvider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AudioFileProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLAudioPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLAudioProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -143,9 +143,6 @@
     <ClCompile Include="Thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BochanThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TCPServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -170,16 +167,19 @@
     <ClCompile Include="SignalProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AudioDevicePlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AudioDeviceProvider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AudioFileProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLAudioPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLAudioProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

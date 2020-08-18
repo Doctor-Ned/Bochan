@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "BochanThread.h"
+#include "WinThread.h"
 
 using namespace bochan;
 
@@ -14,8 +14,8 @@ void basicThreadTestProc(Thread* thread, void* ptr) {
     }
 }
 
-TEST(BochanThread, BasicThreadTest) {
-    BochanThread thread{};
+TEST(WinThread, BasicThreadTest) {
+    WinThread thread{};
     {
         std::lock_guard lock(mutex);
         ASSERT_EQ(0UL, thread.getThreadId());

@@ -103,23 +103,23 @@
     <ClInclude Include="AudioProvider.h" />
     <ClInclude Include="AVCodecConfig.h" />
     <ClInclude Include="BochanAPI.h" />
-    <ClInclude Include="AudioDevicePlayer.h" />
+    <ClInclude Include="SDLAudioPlayer.h" />
     <ClInclude Include="BochanCodec.h" />
     <ClInclude Include="BochanDecoder.h" />
     <ClInclude Include="BochanEncoder.h" />
     <ClInclude Include="BochanLog.h" />
     <ClInclude Include="BochanTCPClient.h" />
     <ClInclude Include="BochanTCPServer.h" />
-    <ClInclude Include="BochanThread.h" />
+    <ClInclude Include="WinThread.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="BufferPool.h" />
     <ClInclude Include="CodecConfig.h" />
     <ClInclude Include="CodecUtil.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="AudioDeviceProvider.h" />
+    <ClInclude Include="SDLAudioProvider.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SignalProvider.h" />
-    <ClInclude Include="SoundUtil.h" />
+    <ClInclude Include="SDLUtil.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="TCPServer.h" />
     <ClInclude Include="TCPSocket.h" />
@@ -132,23 +132,23 @@
     <ClCompile Include="AudioEncoder.cpp" />
     <ClCompile Include="AudioFileProvider.cpp" />
     <ClCompile Include="AudioPlayer.cpp" />
-    <ClCompile Include="AudioDevicePlayer.cpp" />
+    <ClCompile Include="SDLAudioPlayer.cpp" />
     <ClCompile Include="BochanDecoder.cpp" />
     <ClCompile Include="BochanEncoder.cpp" />
     <ClCompile Include="BochanLog.cpp" />
     <ClCompile Include="BochanTCPClient.cpp" />
     <ClCompile Include="BochanTCPServer.cpp" />
-    <ClCompile Include="BochanThread.cpp" />
+    <ClCompile Include="WinThread.cpp" />
     <ClCompile Include="BufferPool.cpp" />
     <ClCompile Include="CodecUtil.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="AudioDeviceProvider.cpp" />
+    <ClCompile Include="SDLAudioProvider.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SignalProvider.cpp" />
-    <ClCompile Include="SoundUtil.cpp" />
+    <ClCompile Include="SDLUtil.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="TCPSocket.cpp" />

@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "BochanThread.h"
+#include "WinThread.h"
 
 #include <windows.h>
 
-bochan::BochanThread::~BochanThread() {
+bochan::WinThread::~WinThread() {
     if (threadHandle) {
         if (running && !join()) {
             BOCHAN_WARN("Failed to join thread while destroying the object, terminating...");
@@ -15,7 +15,7 @@ bochan::BochanThread::~BochanThread() {
     }
 }
 
-bool bochan::BochanThread::run(ThreadFunc func, void* ptr) {
+bool bochan::WinThread::run(ThreadFunc func, void* ptr) {
     std::lock_guard lock(mutex);
     if (running) {
         BOCHAN_WARN("Attempted to invoke run on a thread that is already running!");
@@ -37,7 +37,7 @@ bool bochan::BochanThread::run(ThreadFunc func, void* ptr) {
     return true;
 }
 
-bool bochan::BochanThread::isRunning() {
+bool bochan::WinThread::isRunning() {
     if (running) {
         DWORD exitCode;
         if (!GetExitCodeThread(threadHandle, &exitCode)) {
@@ -61,15 +61,15 @@ bool bochan::BochanThread::isRunning() {
     return running;
 }
 
-void bochan::BochanThread::interrupt() {
+void bochan::WinThread::interrupt() {
     interrupted = true;
 }
 
-bool bochan::BochanThread::isInterrupted() {
+bool bochan::WinThread::isInterrupted() {
     return interrupted;
 }
 
-bool bochan::BochanThread::join() {
+bool bochan::WinThread::join() {
     std::lock_guard lock(mutex);
     if (!running) {
         closeThreadHandle();
@@ -97,7 +97,7 @@ bool bochan::BochanThread::join() {
     }
 }
 
-bool bochan::BochanThread::terminate() {
+bool bochan::WinThread::terminate() {
     std::lock_guard lock(mutex);
     if (!running) {
         return true;
@@ -111,11 +111,11 @@ bool bochan::BochanThread::terminate() {
     return true;
 }
 
-BOCHANAPI DWORD bochan::BochanThread::getThreadId() {
+BOCHANAPI DWORD bochan::WinThread::getThreadId() {
     return threadHandle ? GetThreadId(threadHandle) : 0UL;
 }
 
-void bochan::BochanThread::closeThreadHandle() {
+void bochan::WinThread::closeThreadHandle() {
     if (threadHandle) {
         if (!CloseHandle(threadHandle)) {
             BOCHAN_WARN("Failed to close the thread handle!");
@@ -125,7 +125,7 @@ void bochan::BochanThread::closeThreadHandle() {
     }
 }
 
-DWORD WINAPI bochan::BochanThread::threadProc(LPVOID param) {
+DWORD WINAPI bochan::WinThread::threadProc(LPVOID param) {
     Thread* thread = reinterpret_cast<Thread*>(param);
     ThreadFunc threadFunc = thread->getThreadFunc();
     if (threadFunc) {

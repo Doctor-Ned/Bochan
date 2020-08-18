@@ -5,14 +5,14 @@
 #define THREAD_RESULT_TERMINATED 1UL
 
 namespace bochan {
-    class BochanThread sealed : public Thread {
+    class WinThread sealed : public Thread {
     public:
-        BochanThread() = default;
-        BOCHANAPI ~BochanThread();
-        BochanThread(BochanThread&) = delete;
-        BochanThread(BochanThread&&) = delete;
-        BochanThread& operator=(BochanThread&) = delete;
-        BochanThread& operator=(BochanThread&&) = delete;
+        WinThread() = default;
+        BOCHANAPI ~WinThread();
+        WinThread(WinThread&) = delete;
+        WinThread(WinThread&&) = delete;
+        WinThread& operator=(WinThread&) = delete;
+        WinThread& operator=(WinThread&&) = delete;
         BOCHANAPI bool run(ThreadFunc func, void* ptr) override;
         BOCHANAPI bool isRunning() override;
         BOCHANAPI void interrupt() override;
