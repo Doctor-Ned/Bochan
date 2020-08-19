@@ -76,7 +76,7 @@ xcopy /Y "$(SolutionDir)thirdparty\sdl\dll\*.dll" "$(TargetDir)"
 xcopy /Y /E /i "$(SolutionDir)TestSounds" "$(TargetDir)TestSounds"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copying DLLs and sounds...</Message>
+      <Message>Copying libraries and test sounds...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -97,6 +97,14 @@ xcopy /Y /E /i "$(SolutionDir)TestSounds" "$(TargetDir)TestSounds"</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <AdditionalDependencies>$(SolutionDir)thirdparty\ffmpeg\lib\*.lib;$(SolutionDir)thirdparty\spdlog\lib\spdlog.lib;$(SolutionDir)thirdparty\sdl\lib\*.lib;$(MSBuildThisFileDirectory)..\..\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Release\gtest_main.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(SolutionDir)thirdparty\ffmpeg\dll\*.dll" "$(TargetDir)"
+xcopy /Y "$(SolutionDir)thirdparty\sdl\dll\*.dll" "$(TargetDir)"
+xcopy /Y /E /i "$(SolutionDir)TestSounds" "$(TargetDir)TestSounds"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying libraries and test sounds...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
