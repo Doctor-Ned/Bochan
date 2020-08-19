@@ -28,6 +28,7 @@ namespace bochan {
         BOCHANAPI static int getHighestSupportedSampleRate(const AVCodec* codec);
         BOCHANAPI static std::vector<AVSampleFormat> getSupportedSampleFormats(const AVCodec* codec);
         BOCHANAPI static std::vector<int> getSupportedSampleRates(const AVCodec* codec);
+        BOCHANAPI static std::vector<int> getSupportedSampleRates(const BochanCodec codec);
         BOCHANAPI static bool isSampleRateSupported(const AVCodec* codec, int sampleRate);
         BOCHANAPI static AVCodecConfig getCodecConfig(const BochanCodec codec);
         BOCHANAPI static void printDebugInfo(const AVCodecContext* context);

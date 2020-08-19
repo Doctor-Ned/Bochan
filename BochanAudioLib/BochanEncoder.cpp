@@ -55,6 +55,11 @@ bool bochan::BochanEncoder::initialize(const CodecConfig& config) {
         deinitialize();
         return false;
     }
+    if (context->sample_rate != config.sampleRate) {
+        BOCHAN_ERROR("Sample rate {} is unsupported for this codec (changed to {})!", config.sampleRate, context->sample_rate);
+        deinitialize();
+        return false;
+    }
     if (!context->frame_size) {
         context->frame_size = CodecUtil::DEFAULT_FRAMESIZE;
         BOCHAN_DEBUG("Unrestricted frame size, setting to {}.", CodecUtil::DEFAULT_FRAMESIZE);

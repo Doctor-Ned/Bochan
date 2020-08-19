@@ -29,6 +29,7 @@ using namespace bochan;
 
 void bochanProviderPlayer() {
     const CodecConfig CONFIG{ BochanCodec::Opus, 48000, 64000 };
+    std::vector<int> SAMPLE_RATES = CodecUtil::getSupportedSampleRates(CONFIG.codec);
     BufferPool bufferPool(1024 * 1024 * 1024);
     std::vector<const char*> DRIVERS = SDLUtil::getAudioDrivers();
     SDLAudioPlayer player{};

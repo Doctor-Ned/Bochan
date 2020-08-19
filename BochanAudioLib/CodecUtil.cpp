@@ -124,6 +124,14 @@ std::vector<int> bochan::CodecUtil::getSupportedSampleRates(const AVCodec* codec
     return result;
 }
 
+std::vector<int> bochan::CodecUtil::getSupportedSampleRates(const BochanCodec codec) {
+    AVCodec* avCodec = avcodec_find_encoder(getCodecConfig(codec).codecId);
+    if (!avCodec) {
+        return {};
+    }
+    return getSupportedSampleRates(avCodec);
+}
+
 bool bochan::CodecUtil::isSampleRateSupported(const AVCodec* codec, int sampleRate) {
     if (sampleRate <= 0) {
         return false;

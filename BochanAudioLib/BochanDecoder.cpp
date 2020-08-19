@@ -108,6 +108,11 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, bool saveToFil
         deinitialize();
         return false;
     }
+    if (context->sample_rate != config.sampleRate) {
+        BOCHAN_ERROR("Sample rate {} is unsupported for this codec (changed to {})!", config.sampleRate, context->sample_rate);
+        deinitialize();
+        return false;
+    }
     if (int ret = avcodec_parameters_from_context(stream->codecpar, context); ret < 0) {
         BOCHAN_LOG_AV_ERROR("Failed to initialize stream parameters: {}", ret);
         deinitialize();
@@ -152,6 +157,7 @@ bool bochan::BochanDecoder::initialize(const CodecConfig& config, bool saveToFil
 
 void bochan::BochanDecoder::deinitialize() {
     BOCHAN_DEBUG("Deinitializing decoder...");
+    bool wasInitialized = initialized;
     initialized = false;
     if (parser) {
         av_parser_close(parser);
@@ -164,7 +170,7 @@ void bochan::BochanDecoder::deinitialize() {
         av_packet_free(&packet);
     }
     if (formatContext) {
-        if (saveToFile) {
+        if (wasInitialized && saveToFile) {
             if (int ret = av_write_frame(formatContext, nullptr); ret < 0) {
                 BOCHAN_LOG_AV_ERROR("Failed to flush frame to the file: {}", ret);
             }
