@@ -11,8 +11,8 @@ namespace bochan {
         BufferPool& operator=(BufferPool&) = delete;
         BufferPool& operator=(BufferPool&&) = delete;
         BOCHANAPI ByteBuffer* getBuffer(size_t size);
-        BOCHANAPI bool freeBuffer(ByteBuffer* buffer);
-        BOCHANAPI bool freeAndRemoveBuffer(ByteBuffer* buffer);
+        BOCHANAPI bool freeBuffer(gsl::not_null<ByteBuffer*> buffer);
+        BOCHANAPI bool freeAndRemoveBuffer(gsl::not_null<ByteBuffer*> buffer);
         BOCHANAPI void flushUnused();
         BOCHANAPI size_t getTotalSize() const;
         BOCHANAPI size_t getUsedSize() const;
@@ -20,11 +20,11 @@ namespace bochan {
         BOCHANAPI size_t getUnallocatedSize() const;
         BOCHANAPI size_t getMaxSize() const;
     private:
-        BOCHANAPI bool freeBuffer(ByteBuffer* buffer, bool remove);
-        BOCHANAPI void addUsed(ByteBuffer* buffer);
+        BOCHANAPI bool freeBuffer(gsl::not_null<ByteBuffer*> buffer, bool remove);
+        BOCHANAPI void addUsed(gsl::not_null<ByteBuffer*> buffer);
         BOCHANAPI ByteBuffer* addBuffer(size_t size, bool setFree);
-        BOCHANAPI void addToFreeBuffers(ByteBuffer* buffer);
-        BOCHANAPI bool deleteBuffer(ByteBuffer* buffer, bool checkIfFree);
+        BOCHANAPI void addToFreeBuffers(gsl::not_null<ByteBuffer*> buffer);
+        BOCHANAPI bool deleteBuffer(gsl::not_null<ByteBuffer*> buffer, bool checkIfFree);
         mutable std::recursive_mutex mutex{};
         std::vector<ByteBuffer*> usedBuffers{}, freeBuffers{};
         size_t maxSize{};

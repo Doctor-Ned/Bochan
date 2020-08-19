@@ -5,7 +5,7 @@ using namespace bochan;
 
 std::mutex mutex{};
 
-void basicThreadTestProc(Thread* thread, void* ptr) {
+void basicThreadTestProc(gsl::not_null<Thread*> thread, void* ptr) {
     while (!thread->isInterrupted()) {
         if (mutex.try_lock()) {
             mutex.unlock();

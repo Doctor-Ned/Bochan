@@ -6,7 +6,7 @@
 
 namespace bochan {
     class BOCHANAPI Thread;
-    typedef void (*ThreadFunc)(Thread*, void* ptr);
+    typedef void (*ThreadFunc)(gsl::not_null<Thread*>, void* ptr);
 
     class BOCHANAPI Thread {
     public:

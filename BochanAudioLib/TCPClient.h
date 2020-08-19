@@ -7,8 +7,6 @@ namespace bochan {
     public:
         TCPClient(BufferPool& bufferPool);
         ~TCPClient() = default;
-        virtual bool connect(const char* ipAddress, unsigned short port) = 0; // blocking
-    private:
-
+        virtual bool connect(gsl::not_null<const char*> ipAddress, unsigned short port) = 0; // blocking
     };
 }

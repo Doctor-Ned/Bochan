@@ -16,7 +16,7 @@ namespace bochan {
         BOCHANAPI bool record();
         BOCHANAPI void stop();
         BOCHANAPI void flush();
-        BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;
+        BOCHANAPI bool fillBuffer(gsl::not_null<ByteBuffer*> buff) override;
         BOCHANAPI std::vector<const char*> getAvailableDevices() const;
     private:
         BOCHANAPI void reduceBuffer(size_t size);

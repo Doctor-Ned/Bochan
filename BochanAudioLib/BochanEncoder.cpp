@@ -135,7 +135,7 @@ bochan::ByteBuffer* bochan::BochanEncoder::getExtradata() {
     return result;
 }
 
-std::vector<bochan::AudioPacket> bochan::BochanEncoder::encode(ByteBuffer* samples) {
+std::vector<bochan::AudioPacket> bochan::BochanEncoder::encode(gsl::not_null<ByteBuffer*> samples) {
     assert(samples->getUsedSize() == getInputBufferByteSize());
     if (int ret = av_frame_make_writable(frame); ret < 0) {
         BOCHAN_LOG_AV_ERROR("Failed to ensure writable frame: {}", ret);

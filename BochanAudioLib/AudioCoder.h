@@ -14,8 +14,8 @@ namespace bochan {
         virtual bool isInitialized() const = 0;
         CodecConfig getCodecConfig() const;
     protected:
-        ByteBuffer* int16ToFloat(ByteBuffer* samples);
-        ByteBuffer* floatToInt16(ByteBuffer* fltp);
+        ByteBuffer* int16ToFloat(gsl::not_null<ByteBuffer*> samples);
+        ByteBuffer* floatToInt16(gsl::not_null<ByteBuffer*> fltp);
         BufferPool* bufferPool{ nullptr };
         CodecConfig config{};
     };

@@ -9,6 +9,6 @@ namespace bochan {
         virtual ~AudioProvider() = default;
         virtual void deinitialize() = 0;
         virtual bool isInitialized() const = 0;
-        virtual bool fillBuffer(ByteBuffer* buff) = 0;
+        virtual bool fillBuffer(gsl::not_null<ByteBuffer*> buff) = 0;
     };
 }

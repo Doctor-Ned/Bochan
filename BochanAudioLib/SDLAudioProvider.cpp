@@ -101,7 +101,7 @@ void bochan::SDLAudioProvider::flush() {
     }
 }
 
-bool bochan::SDLAudioProvider::fillBuffer(ByteBuffer* buff) {
+bool bochan::SDLAudioProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
     uint8_t* ptr = buff->getPointer();
     size_t remaining = buff->getUsedSize();
     if (!recording) {

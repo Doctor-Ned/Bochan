@@ -8,7 +8,7 @@ bochan::AudioFileProvider::~AudioFileProvider() {
     }
 }
 
-bool bochan::AudioFileProvider::initialize(const char* fileName, int sampleRate, size_t bufferSize) {
+bool bochan::AudioFileProvider::initialize(gsl::not_null<const char*> fileName, int sampleRate, size_t bufferSize) {
     if (initialized) {
         deinitialize();
     }
@@ -142,7 +142,7 @@ bool bochan::AudioFileProvider::isInitialized() const {
     return initialized;
 }
 
-bool bochan::AudioFileProvider::fillBuffer(ByteBuffer* buff) {
+bool bochan::AudioFileProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
     int samples = static_cast<int>(buff->getUsedSize()) / sizeof(int16_t) / CodecUtil::CHANNELS;
     if (simulateTime) {
         std::chrono::microseconds buffTimeNanos{

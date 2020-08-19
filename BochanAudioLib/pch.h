@@ -11,5 +11,6 @@
 #include "framework.h"
 #include "BochanAPI.h"
 #include "BochanLog.h"
+#include <gsl/gsl-lite.hpp>
 
 #endif //PCH_H

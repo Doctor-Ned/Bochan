@@ -11,7 +11,7 @@ bochan::BochanTCPClient::~BochanTCPClient() {
     WinsockUtil::wsaCleanup(this);
 }
 
-bool bochan::BochanTCPClient::connect(const char* ipAddress, unsigned short port) {
+bool bochan::BochanTCPClient::connect(gsl::not_null<const char*> ipAddress, unsigned short port) {
     BOCHAN_DEBUG("Attempting to connect to {}:{}...", ipAddress, port);
     if (!WinsockUtil::wsaStartup(this)) {
         return false;
@@ -47,7 +47,7 @@ bool bochan::BochanTCPClient::connect(const char* ipAddress, unsigned short port
     return true;
 }
 
-bool bochan::BochanTCPClient::send(ByteBuffer* buff) {
+bool bochan::BochanTCPClient::send(gsl::not_null<ByteBuffer*> buff) {
     if (::send(socket, reinterpret_cast<char*>(buff->getPointer()), static_cast<int>(buff->getUsedSize()), 0) == SOCKET_ERROR) {
         BOCHAN_ERROR("Failed to send {} data ({})!", buff->getUsedSize(), WSAGetLastError());
         return false;

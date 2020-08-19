@@ -7,10 +7,8 @@ namespace bochan {
     public:
         TCPServer(BufferPool& bufferPool);
         ~TCPServer() = default;
-        virtual bool bindAndListen(const char* ipAddress, unsigned short port) = 0;
+        virtual bool bindAndListen(gsl::not_null<const char*> ipAddress, unsigned short port) = 0;
         virtual bool isListening() = 0;
         virtual bool acceptClient() = 0; // blocking
-    private:
-
     };
 }

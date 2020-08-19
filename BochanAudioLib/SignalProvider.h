@@ -20,7 +20,7 @@ namespace bochan {
         BOCHANAPI bool initialize(int sampleRate);
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
-        BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;
+        BOCHANAPI bool fillBuffer(gsl::not_null<ByteBuffer*> buff) override;
         BOCHANAPI void setFrequency(double freq);
         BOCHANAPI double getFrequency() const;
         BOCHANAPI void setAmplitude(double amplitude);

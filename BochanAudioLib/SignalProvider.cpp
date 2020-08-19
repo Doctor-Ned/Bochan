@@ -19,7 +19,7 @@ bool bochan::SignalProvider::isInitialized() const {
     return sampleRate != 0;
 }
 
-bool bochan::SignalProvider::fillBuffer(ByteBuffer* buff) {
+bool bochan::SignalProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
     if (sampleRate == 0) {
         return false;
     }

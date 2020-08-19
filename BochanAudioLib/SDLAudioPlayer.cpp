@@ -74,7 +74,7 @@ bool bochan::SDLAudioPlayer::isInitialized() const {
     return initialized;
 }
 
-size_t bochan::SDLAudioPlayer::queueData(ByteBuffer* buff) {
+size_t bochan::SDLAudioPlayer::queueData(gsl::not_null<ByteBuffer*> buff) {
     if (!initialized) {
         return 0ULL;
     }

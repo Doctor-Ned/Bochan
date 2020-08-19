@@ -9,7 +9,7 @@ namespace bochan {
     public:
         TCPSocket(BufferPool& bufferPool);
         virtual ~TCPSocket() = default;
-        virtual bool send(ByteBuffer* buff) = 0; // blocking
+        virtual bool send(gsl::not_null<ByteBuffer*> buff) = 0; // blocking
         virtual ByteBuffer* receive() = 0; // blocking, might return nullptr
         virtual bool shutdown() = 0; // should stop any send/receive attempts
         virtual bool close() = 0;

@@ -16,7 +16,7 @@ namespace bochan {
         BOCHANAPI bool initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) override;
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
-        BOCHANAPI size_t queueData(ByteBuffer* buff) override;
+        BOCHANAPI size_t queueData(gsl::not_null<ByteBuffer*> buff) override;
         BOCHANAPI bool isPlaying() override;
         BOCHANAPI bool play() override;
         BOCHANAPI void stop() override;

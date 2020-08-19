@@ -14,10 +14,10 @@ namespace bochan {
     public:
         AudioFileProvider() = default;
         BOCHANAPI ~AudioFileProvider();
-        BOCHANAPI bool initialize(const char* fileName, int sampleRate, size_t bufferSize);
+        BOCHANAPI bool initialize(gsl::not_null<const char*> fileName, int sampleRate, size_t bufferSize);
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
-        BOCHANAPI bool fillBuffer(ByteBuffer* buff) override;
+        BOCHANAPI bool fillBuffer(gsl::not_null<ByteBuffer*> buff) override;
         BOCHANAPI bool isSimulatingTime() const;
         BOCHANAPI void setSimulateTime(bool simulateTime);
         BOCHANAPI double getDuration();

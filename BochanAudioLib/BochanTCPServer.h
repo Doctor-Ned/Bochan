@@ -12,10 +12,10 @@ namespace bochan {
         BochanTCPServer(BochanTCPServer&&) = delete;
         BochanTCPServer& operator=(BochanTCPServer&) = delete;
         BochanTCPServer& operator=(BochanTCPServer&&) = delete;
-        bool bindAndListen(const char* ipAddress, unsigned short port) override;
+        bool bindAndListen(gsl::not_null<const char*> ipAddress, unsigned short port) override;
         bool isListening() override;
         bool acceptClient() override;
-        bool send(ByteBuffer* buff) override;
+        bool send(gsl::not_null<ByteBuffer*> buff) override;
         ByteBuffer* receive() override;
         bool shutdown() override;
         bool close() override;

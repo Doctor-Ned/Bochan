@@ -68,7 +68,7 @@ void bochan::CodecUtil::initialiseAvLog() {
     }
 }
 
-bool bochan::CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFormat format) {
+bool bochan::CodecUtil::isFormatSupported(const gsl::not_null<AVCodec*> codec, const AVSampleFormat format) {
     if (!codec->sample_fmts) {
         return DEFAULT_SAMPLEFORMAT;
     }
@@ -82,7 +82,7 @@ bool bochan::CodecUtil::isFormatSupported(const AVCodec* codec, const AVSampleFo
     return false;
 }
 
-int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
+int bochan::CodecUtil::getHighestSupportedSampleRate(const gsl::not_null<AVCodec*> codec) {
     if (!codec->supported_samplerates)
         return DEFAULT_SAMPLERATE;
 
@@ -97,7 +97,7 @@ int bochan::CodecUtil::getHighestSupportedSampleRate(const AVCodec* codec) {
     return sampleRate;
 }
 
-std::vector<AVSampleFormat> bochan::CodecUtil::getSupportedSampleFormats(const AVCodec* codec) {
+std::vector<AVSampleFormat> bochan::CodecUtil::getSupportedSampleFormats(const gsl::not_null<AVCodec*> codec) {
     if (!codec->sample_fmts) {
         return {};
     }
@@ -110,7 +110,7 @@ std::vector<AVSampleFormat> bochan::CodecUtil::getSupportedSampleFormats(const A
     return result;
 }
 
-std::vector<int> bochan::CodecUtil::getSupportedSampleRates(const AVCodec* codec) {
+std::vector<int> bochan::CodecUtil::getSupportedSampleRates(const gsl::not_null<AVCodec*> codec) {
     if (!codec->supported_samplerates)
         return {};
 
@@ -132,7 +132,7 @@ std::vector<int> bochan::CodecUtil::getSupportedSampleRates(const BochanCodec co
     return getSupportedSampleRates(avCodec);
 }
 
-bool bochan::CodecUtil::isSampleRateSupported(const AVCodec* codec, int sampleRate) {
+bool bochan::CodecUtil::isSampleRateSupported(const gsl::not_null<AVCodec*> codec, int sampleRate) {
     if (sampleRate <= 0) {
         return false;
     }
@@ -157,7 +157,7 @@ bochan::AVCodecConfig bochan::CodecUtil::getCodecConfig(const BochanCodec codec)
     return it->second;
 }
 
-void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {
+void bochan::CodecUtil::printDebugInfo(const gsl::not_null <AVCodecContext*> context) {
     BOCHAN_INFO("CONTEXT INFO:");
     BOCHAN_INFO("{} BPCS, {} BPRS, {} FS, {} channels (layout {})",
                 context->bits_per_coded_sample, context->bits_per_raw_sample, context->frame_size,
@@ -166,23 +166,23 @@ void bochan::CodecUtil::printDebugInfo(const AVCodecContext* context) {
                 context->sample_fmt, context->sample_rate);
 }
 
-void bochan::CodecUtil::int16ToFloat(ByteBuffer* from, float* to) {
+void bochan::CodecUtil::int16ToFloat(gsl::not_null<ByteBuffer*> from, gsl::not_null<float*> to) {
     int16ToFloat(reinterpret_cast<int16_t*>(from->getPointer()), from->getUsedSize() / sizeof(int16_t), to);
 }
 
-void bochan::CodecUtil::floatToInt16(ByteBuffer* from, int16_t* to) {
+void bochan::CodecUtil::floatToInt16(gsl::not_null<ByteBuffer*> from, gsl::not_null<int16_t*> to) {
     floatToInt16(reinterpret_cast<float*>(from->getPointer()), from->getUsedSize() / sizeof(float), to);
 }
 
-void bochan::CodecUtil::int16ToFloat(int16_t* from, size_t count, float* to) {
+void bochan::CodecUtil::int16ToFloat(gsl::not_null<int16_t*> from, size_t count, gsl::not_null<float*> to) {
     for (int i = 0; i < count; ++i) {
-        to[i] = int16ToFloat(from[i]);
+        to.get()[i] = int16ToFloat(from.get()[i]);
     }
 }
 
-void bochan::CodecUtil::floatToInt16(float* from, size_t count, int16_t* to) {
+void bochan::CodecUtil::floatToInt16(gsl::not_null<float*> from, size_t count, gsl::not_null<int16_t*> to) {
     for (int i = 0; i < count; ++i) {
-        to[i] = floatToInt16(from[i]);
+        to.get()[i] = floatToInt16(from.get()[i]);
     }
 }
 
