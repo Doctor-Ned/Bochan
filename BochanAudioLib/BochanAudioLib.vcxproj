@@ -58,7 +58,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include;$(SolutionDir)thirdparty\sdl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\gsl-lite\include;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include;$(SolutionDir)thirdparty\sdl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,7 +80,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include;$(SolutionDir)thirdparty\sdl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\gsl-lite\include;$(SolutionDir)thirdparty\msinttypes\include;$(SolutionDir)thirdparty\ffmpeg\include;$(SolutionDir)thirdparty\spdlog\include;$(SolutionDir)thirdparty\sdl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
