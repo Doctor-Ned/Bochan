@@ -10,12 +10,12 @@ bochan::CodecConfig bochan::AudioCoder::getCodecConfig() const {
 
 bochan::ByteBuffer* bochan::AudioCoder::int16ToFloat(gsl::not_null<ByteBuffer*> samples) {
     ByteBuffer* result = bufferPool->getBuffer(samples->getUsedSize() * sizeof(float) / sizeof(int16_t));
-    CodecUtil::int16ToFloat(samples, reinterpret_cast<float*>(result->getPointer()));
+    CodecUtil::int16ToFloat(samples->getSpan<int16_t>(), result->getSpan<float>());
     return result;
 }
 
 bochan::ByteBuffer* bochan::AudioCoder::floatToInt16(gsl::not_null<ByteBuffer*> fltp) {
     ByteBuffer* result = bufferPool->getBuffer(fltp->getUsedSize() * sizeof(int16_t) / sizeof(float));
-    CodecUtil::floatToInt16(fltp, reinterpret_cast<int16_t*>(result->getPointer()));
+    CodecUtil::floatToInt16(fltp->getSpan<float>(), result->getSpan<int16_t>());
     return result;
 }

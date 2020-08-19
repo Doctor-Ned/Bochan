@@ -11,7 +11,7 @@ using namespace bochan;
 TEST(CodecUtil, Int16ToFloat) {
     int16_t ints[4]{ 0, -32768, 32767, 16384 };
     float floats[4];
-    CodecUtil::int16ToFloat(ints, 4, floats);
+    CodecUtil::int16ToFloat(gsl::make_span<int16_t>(ints, 4), gsl::make_span<float>(floats, 4));
     ASSERT_EQ(0.0f, floats[0]);
     ASSERT_LE(abs(floats[1] + 1.0f), EPSILON);
     ASSERT_LE(abs(floats[2] - 1.0f), EPSILON);
@@ -20,7 +20,7 @@ TEST(CodecUtil, Int16ToFloat) {
 TEST(CodecUtil, FloatToInt16) {
     float floats[4]{ 0.0f, -1.0f, 1.0f, 0.5f };
     int16_t ints[4];
-    CodecUtil::floatToInt16(floats, 4, ints);
+    CodecUtil::floatToInt16(gsl::make_span<float>(floats, 4), gsl::make_span<int16_t>(ints, 4));
     ASSERT_EQ(0, ints[0]);
     ASSERT_LE(abs(static_cast<int>(ints[1]) + 32768), IEPSILON);
     ASSERT_LE(abs(static_cast<int>(ints[2]) - 32767), IEPSILON);
@@ -29,8 +29,8 @@ TEST(CodecUtil, FloatToInt16) {
 TEST(CodecUtil, Int16ToFloatAndBack) {
     int16_t ints[4]{ 0, -32768, 32767, 16384 };
     float floats[4];
-    CodecUtil::int16ToFloat(ints, 4, floats);
-    CodecUtil::floatToInt16(floats, 4, ints);
+    CodecUtil::int16ToFloat(gsl::make_span<int16_t>(ints, 4), gsl::make_span<float>(floats, 4));
+    CodecUtil::floatToInt16(gsl::make_span<float>(floats, 4), gsl::make_span<int16_t>(ints, 4));
     ASSERT_EQ(ints[0], 0);
     ASSERT_LE(abs(static_cast<int>(ints[1]) + 32768), IEPSILON);
     ASSERT_LE(abs(static_cast<int>(ints[2]) - 32767), IEPSILON);
@@ -39,8 +39,8 @@ TEST(CodecUtil, Int16ToFloatAndBack) {
 TEST(CodecUtil, FloatToInt16AndBack) {
     float floats[4]{ 0.0f, -1.0f, 1.0f, 0.5f };
     int16_t ints[4];
-    CodecUtil::floatToInt16(floats, 4, ints);
-    CodecUtil::int16ToFloat(ints, 4, floats);
+    CodecUtil::floatToInt16(gsl::make_span<float>(floats, 4), gsl::make_span<int16_t>(ints, 4));
+    CodecUtil::int16ToFloat(gsl::make_span<int16_t>(ints, 4), gsl::make_span<float>(floats, 4));
     ASSERT_EQ(0.0f, floats[0]);
     ASSERT_LE(abs(floats[1] + 1.0f), EPSILON);
     ASSERT_LE(abs(floats[2] - 1.0f), EPSILON);

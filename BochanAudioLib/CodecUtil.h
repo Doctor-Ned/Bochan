@@ -32,10 +32,8 @@ namespace bochan {
         BOCHANAPI static bool isSampleRateSupported(const gsl::not_null<AVCodec*> codec, int sampleRate);
         BOCHANAPI static AVCodecConfig getCodecConfig(const BochanCodec codec);
         BOCHANAPI static void printDebugInfo(const gsl::not_null<AVCodecContext*> context);
-        BOCHANAPI static void int16ToFloat(gsl::not_null<ByteBuffer*> from, gsl::not_null<float*> to);
-        BOCHANAPI static void floatToInt16(gsl::not_null<ByteBuffer*> from, gsl::not_null<int16_t*> to);
-        BOCHANAPI static void int16ToFloat(gsl::not_null<int16_t*> from, size_t count, gsl::not_null<float*> to);
-        BOCHANAPI static void floatToInt16(gsl::not_null<float*> from, size_t count, gsl::not_null<int16_t*> to);
+        BOCHANAPI static void int16ToFloat(gsl::span<int16_t> from, gsl::span<float> to);
+        BOCHANAPI static void floatToInt16(gsl::span<float> from, gsl::span<int16_t> to);
         BOCHANAPI static float int16ToFloat(int16_t value);
         BOCHANAPI static int16_t floatToInt16(float value);
         BOCHANAPI static size_t getBytesPerSecond(int sampleRate);

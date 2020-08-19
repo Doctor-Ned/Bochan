@@ -166,23 +166,17 @@ void bochan::CodecUtil::printDebugInfo(const gsl::not_null <AVCodecContext*> con
                 context->sample_fmt, context->sample_rate);
 }
 
-void bochan::CodecUtil::int16ToFloat(gsl::not_null<ByteBuffer*> from, gsl::not_null<float*> to) {
-    int16ToFloat(reinterpret_cast<int16_t*>(from->getPointer()), from->getUsedSize() / sizeof(int16_t), to);
-}
-
-void bochan::CodecUtil::floatToInt16(gsl::not_null<ByteBuffer*> from, gsl::not_null<int16_t*> to) {
-    floatToInt16(reinterpret_cast<float*>(from->getPointer()), from->getUsedSize() / sizeof(float), to);
-}
-
-void bochan::CodecUtil::int16ToFloat(gsl::not_null<int16_t*> from, size_t count, gsl::not_null<float*> to) {
-    for (int i = 0; i < count; ++i) {
-        to.get()[i] = int16ToFloat(from.get()[i]);
+void bochan::CodecUtil::int16ToFloat(gsl::span<int16_t> from, gsl::span<float> to) {
+    assert(from.size() == to.size());
+    for (int i = 0; i < from.size(); ++i) {
+        to[i] = int16ToFloat(from[i]);
     }
 }
 
-void bochan::CodecUtil::floatToInt16(gsl::not_null<float*> from, size_t count, gsl::not_null<int16_t*> to) {
-    for (int i = 0; i < count; ++i) {
-        to.get()[i] = floatToInt16(from.get()[i]);
+void bochan::CodecUtil::floatToInt16(gsl::span<float> from, gsl::span<int16_t> to) {
+    assert(from.size() == to.size());
+    for (int i = 0; i < from.size(); ++i) {
+        to[i] = floatToInt16(from[i]);
     }
 }
 

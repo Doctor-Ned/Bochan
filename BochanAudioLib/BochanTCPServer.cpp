@@ -11,8 +11,12 @@ bochan::BochanTCPServer::~BochanTCPServer() {
     WinsockUtil::wsaCleanup(this);
 }
 
-bool bochan::BochanTCPServer::bindAndListen(gsl::not_null<const char*> ipAddress, unsigned short port) {
-    BOCHAN_DEBUG("Attempting to bind a socket to {}:{}...", ipAddress, port);
+bool bochan::BochanTCPServer::bindAndListen(gsl::cstring_span ipAddress, unsigned short port) {
+    if (ipAddress.empty()) {
+        BOCHAN_ERROR("Provided IP address is empty!");
+        return false;
+    }
+    BOCHAN_DEBUG("Attempting to bind a socket to {}:{}...", ipAddress.cbegin(), port);
     if (!WinsockUtil::wsaStartup(this)) {
         return false;
     }
@@ -25,7 +29,7 @@ bool bochan::BochanTCPServer::bindAndListen(gsl::not_null<const char*> ipAddress
         return false;
     }
     address = { AF_INET, port, 0, {0} };
-    if (int ret = InetPtonA(address.sin_family, ipAddress, &address.sin_addr); ret != 1) {
+    if (int ret = InetPtonA(address.sin_family, ipAddress.cbegin(), &address.sin_addr); ret != 1) {
         if (ret == 0) {
             BOCHAN_ERROR("An invalid IP address was provided!");
         } else {

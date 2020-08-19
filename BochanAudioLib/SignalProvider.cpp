@@ -55,7 +55,9 @@ bool bochan::SignalProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
             floatPtr[i * CodecUtil::CHANNELS + j] = fltVal;
         }
     }
-    CodecUtil::floatToInt16(floatPtr, samples * CodecUtil::CHANNELS, reinterpret_cast<int16_t*>(buff->getPointer()));
+    gsl::span<int16_t> int16Span{ buff->getSpan<int16_t>() };
+    assert(int16Span.size() == static_cast<size_t>(samples) * CodecUtil::CHANNELS);
+    CodecUtil::floatToInt16(gsl::make_span<float>(floatPtr, int16Span.size()), int16Span);
     bufferPool->freeBuffer(floatBuff);
     return true;
 }

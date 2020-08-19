@@ -2,7 +2,7 @@
 #include "AudioPlayer.h"
 #include "CodecUtil.h"
 
-bool bochan::AudioPlayer::initializeDefault(const char* audioDevice, int sampleRate) {
+bool bochan::AudioPlayer::initializeDefault(gsl::cstring_span audioDevice, int sampleRate) {
     this->sampleRate = sampleRate;
     size_t bytesPerSecond = CodecUtil::getBytesPerSecond(sampleRate);
     return initialize(audioDevice, sampleRate, bytesPerSecond / 2ULL, bytesPerSecond * 2ULL);

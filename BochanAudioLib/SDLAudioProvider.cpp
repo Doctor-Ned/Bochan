@@ -14,19 +14,18 @@ bochan::SDLAudioProvider::~SDLAudioProvider() {
     SDLUtil::quitAudio(this);
 }
 
-bool bochan::SDLAudioProvider::initialize(const char* audioDevice, int sampleRate, size_t bufferSize, bool forceMono) {
+bool bochan::SDLAudioProvider::initialize(gsl::cstring_span audioDevice, int sampleRate, size_t bufferSize, bool forceMono) {
     if (initialized) {
         deinitialize();
     }
-    if (audioDevice) {
-        BOCHAN_DEBUG("Initializing audio device '{}' with {} SR, {} buffer size (mono: {})...", audioDevice, sampleRate, bufferSize, forceMono);
+    if (!audioDevice.empty()) {
+        BOCHAN_DEBUG("Initializing audio device '{}' with {} SR, {} buffer size (mono: {})...", audioDevice.cbegin(), sampleRate, bufferSize, forceMono);
     } else {
         BOCHAN_DEBUG("Initializing default audio device with {} SR, {} buffer size (mono: {})...", sampleRate, bufferSize, forceMono);
     }
     this->forceMono = forceMono;
     this->audioDevice = audioDevice;
     this->sampleRate = sampleRate;
-    this->bufferSize = bufferSize;
     SDL_AudioSpec wanted{};
     wanted.freq = sampleRate;
     wanted.format = AUDIO_S16;
@@ -34,15 +33,15 @@ bool bochan::SDLAudioProvider::initialize(const char* audioDevice, int sampleRat
     wanted.samples = 512;
     wanted.callback = audioCallback;
     wanted.userdata = this;
-    if (devId = SDL_OpenAudioDevice(audioDevice, SDL_TRUE, &wanted, nullptr, 0); devId == 0) {
-        if (audioDevice) {
-            BOCHAN_ERROR("Failed to open device '{}': {}", audioDevice, SDL_GetError());
+    if (devId = SDL_OpenAudioDevice(audioDevice.cbegin(), SDL_TRUE, &wanted, nullptr, 0); devId == 0) {
+        if (!audioDevice.empty()) {
+            BOCHAN_ERROR("Failed to open device '{}': {}", audioDevice.cbegin(), SDL_GetError());
         } else {
             BOCHAN_ERROR("Failed to open default audio device: {}", SDL_GetError());
         }
         return false;
     }
-    sampleBuffer = new uint8_t[bufferSize];
+    sampleBuffer = gsl::make_span<uint8_t>(new uint8_t[bufferSize], bufferSize);
     sampleBufferPos = 0ULL;
     initialized = true;
     return true;
@@ -59,11 +58,10 @@ void bochan::SDLAudioProvider::deinitialize() {
     }
     devId = 0U;
     audioDevice = nullptr;
-    bufferSize = 0ULL;
     forceMono = false;
     sampleRate = 0;
-    delete[] sampleBuffer;
-    sampleBuffer = nullptr;
+    delete[] sampleBuffer.begin();
+    sampleBuffer = {};
     sampleBufferPos = 0ULL;
 }
 
@@ -110,7 +108,7 @@ bool bochan::SDLAudioProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
             BOCHAN_WARN("Failed to fill the buffer (not recording and not enough bytes buffered)");
             return false;
         }
-        memcpy(ptr, sampleBuffer, remaining);
+        memcpy(ptr, sampleBuffer.begin(), remaining);
         reduceBuffer(remaining);
         return true;
     }
@@ -118,7 +116,7 @@ bool bochan::SDLAudioProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
         if (sampleBufferPos) {
             std::lock_guard lock(bufferMutex);
             size_t toRead = min(static_cast<size_t>(sampleBufferPos), remaining);
-            memcpy(ptr, sampleBuffer, toRead);
+            memcpy(ptr, sampleBuffer.begin(), toRead);
             reduceBuffer(toRead);
             ptr += toRead;
             remaining -= toRead;
@@ -131,8 +129,8 @@ bool bochan::SDLAudioProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
     return true;
 }
 
-std::vector<const char*> bochan::SDLAudioProvider::getAvailableDevices() const {
-    std::vector<const char*> result{};
+std::vector<gsl::cstring_span> bochan::SDLAudioProvider::getAvailableDevices() const {
+    std::vector<gsl::cstring_span> result{};
     const int DEVICE_COUNT{ SDL_GetNumAudioDevices(SDL_TRUE) };
     for (int i = 0; i < DEVICE_COUNT; ++i) {
         result.push_back(SDL_GetAudioDeviceName(i, SDL_TRUE));
@@ -144,7 +142,7 @@ void bochan::SDLAudioProvider::reduceBuffer(size_t size) {
     assert(sampleBufferPos >= size);
     std::lock_guard lock(bufferMutex);
     if (sampleBufferPos > size) {
-        memmove(sampleBuffer, sampleBuffer + size, sampleBufferPos - size);
+        memmove(sampleBuffer.begin(), sampleBuffer.begin() + size, sampleBufferPos - size);
     }
     sampleBufferPos -= size;
 }
@@ -154,13 +152,13 @@ void bochan::SDLAudioProvider::audioCallback(void* ptr, Uint8* stream, int len) 
     std::lock_guard lock(provider->bufferMutex);
     const size_t CHANNELS = CodecUtil::CHANNELS;
     if (provider->forceMono && CHANNELS != 1) {
-        if (provider->bufferSize - provider->sampleBufferPos < CHANNELS * len) {
-            size_t remaining{ provider->sampleBufferPos + CHANNELS * len - provider->bufferSize };
+        if (provider->sampleBuffer.size_bytes() - provider->sampleBufferPos < CHANNELS * len) {
+            size_t remaining{ provider->sampleBufferPos + CHANNELS * len - provider->sampleBuffer.size_bytes() };
             provider->reduceBuffer(remaining);
         }
         int samples = len / sizeof(int16_t);
         int16_t* streamPtr = reinterpret_cast<int16_t*>(stream);
-        int16_t* buffPtr = reinterpret_cast<int16_t*>(provider->sampleBuffer + provider->sampleBufferPos);
+        int16_t* buffPtr = reinterpret_cast<int16_t*>(provider->sampleBuffer.begin() + provider->sampleBufferPos);
         for (int i = 0; i < samples; ++i) {
             for (int j = 0; j < CHANNELS; ++j) {
                 buffPtr[i * CHANNELS + j] = streamPtr[i];
@@ -168,11 +166,11 @@ void bochan::SDLAudioProvider::audioCallback(void* ptr, Uint8* stream, int len) 
         }
         provider->sampleBufferPos += CHANNELS * len;
     } else {
-        if (provider->bufferSize - provider->sampleBufferPos < len) {
-            size_t remaining{ provider->sampleBufferPos + len - provider->bufferSize };
+        if (provider->sampleBuffer.size_bytes() - provider->sampleBufferPos < len) {
+            size_t remaining{ provider->sampleBufferPos + len - provider->sampleBuffer.size_bytes() };
             provider->reduceBuffer(remaining);
         }
-        memcpy(provider->sampleBuffer + provider->sampleBufferPos, stream, len);
+        memcpy(provider->sampleBuffer.begin() + provider->sampleBufferPos, stream, len);
         provider->sampleBufferPos += len;
     }
 }

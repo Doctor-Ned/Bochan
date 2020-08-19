@@ -282,7 +282,8 @@ std::vector<bochan::ByteBuffer*> bochan::BochanDecoder::decode(AudioPacket audio
                     }
                     case AVSampleFormat::AV_SAMPLE_FMT_FLT:
                     {
-                        CodecUtil::floatToInt16(reinterpret_cast<float*>(frame->data[0]), static_cast<size_t>(frame->nb_samples) * frame->channels, reinterpret_cast<int16_t*>(buffPtr));
+                        const size_t sampleCount{ static_cast<size_t>(frame->nb_samples) * frame->channels };
+                        CodecUtil::floatToInt16(gsl::make_span<float>(reinterpret_cast<float*>(frame->data[0]), sampleCount), gsl::make_span<int16_t>(reinterpret_cast<int16_t*>(buffPtr), sampleCount));
                         break;
                     }
                     default:

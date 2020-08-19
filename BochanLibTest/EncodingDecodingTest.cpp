@@ -48,9 +48,9 @@ TEST(EncodingDecoding, BitrateBasedQualityLossTest) {
     size_t sizeToCompare{ min(hqPos, lqPos) };
     size_t samples{ sizeToCompare / sizeof(int16_t) };
     float* inputFlt{ new float[samples] }, * hqFlt{ new float[samples] }, * lqFlt{ new float[samples] };
-    CodecUtil::int16ToFloat(reinterpret_cast<int16_t*>(inputSignal->getPointer()), samples, inputFlt);
-    CodecUtil::int16ToFloat(reinterpret_cast<int16_t*>(hqSignal->getPointer()), samples, hqFlt);
-    CodecUtil::int16ToFloat(reinterpret_cast<int16_t*>(lqSignal->getPointer()), samples, lqFlt);
+    CodecUtil::int16ToFloat(gsl::make_span<int16_t>(reinterpret_cast<int16_t*>(inputSignal->getPointer()), samples), gsl::make_span<float>(inputFlt, samples));
+    CodecUtil::int16ToFloat(gsl::make_span<int16_t>(reinterpret_cast<int16_t*>(hqSignal->getPointer()), samples), gsl::make_span<float>(hqFlt, samples));
+    CodecUtil::int16ToFloat(gsl::make_span<int16_t>(reinterpret_cast<int16_t*>(lqSignal->getPointer()), samples), gsl::make_span<float>(lqFlt, samples));
     float hqErr{ 0.0f }, lqErr{ 0.0f };
     for (size_t i = 0ULL; i < samples; ++i) {
         hqErr += abs(hqFlt[i] - inputFlt[i]);

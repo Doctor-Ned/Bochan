@@ -8,18 +8,17 @@ bochan::AudioFileProvider::~AudioFileProvider() {
     }
 }
 
-bool bochan::AudioFileProvider::initialize(gsl::not_null<const char*> fileName, int sampleRate, size_t bufferSize) {
+bool bochan::AudioFileProvider::initialize(gsl::cstring_span fileName, int sampleRate, size_t bufferSize) {
     if (initialized) {
         deinitialize();
     }
 
-    BOCHAN_DEBUG("Initializing with file '{}', {} SR and {} buffer size...", fileName, sampleRate, bufferSize);
+    BOCHAN_DEBUG("Initializing with file '{}', {} SR and {} buffer size...", fileName.cbegin(), sampleRate, bufferSize);
 
     this->fileName = fileName;
     this->sampleRate = sampleRate;
-    this->bufferSize = bufferSize;
 
-    if (int ret = avformat_open_input(&formatContext, fileName, nullptr, nullptr); ret < 0) {
+    if (int ret = avformat_open_input(&formatContext, fileName.cbegin(), nullptr, nullptr); ret < 0) {
         BOCHAN_LOG_AV_ERROR("Failed to open file: {}", ret);
         deinitialize();
         return false;
@@ -94,7 +93,7 @@ bool bochan::AudioFileProvider::initialize(gsl::not_null<const char*> fileName, 
     }
 
     bytesPerSample = av_get_bytes_per_sample(context->sample_fmt);
-    internalBuffer = new uint8_t[bufferSize];
+    internalBuffer = gsl::make_span<uint8_t>(new uint8_t[bufferSize], bufferSize);
     bufferPos = 0ULL;
 
     initialized = true;
@@ -132,8 +131,8 @@ void bochan::AudioFileProvider::deinitialize() {
     streamId = -1;
     fileName = nullptr;
     sampleRate = 0;
-    delete[] internalBuffer;
-    bufferSize = 0ULL;
+    delete[] internalBuffer.begin();
+    internalBuffer = {};
     bufferPos = 0ULL;
     bytesPerSample = 0;
 }
@@ -162,7 +161,7 @@ bool bochan::AudioFileProvider::fillBuffer(gsl::not_null<ByteBuffer*> buff) {
     while (remaining) {
         if (bufferPos) {
             size_t read = min(remaining, bufferPos);
-            memcpy(ptr, internalBuffer, read);
+            memcpy(ptr, internalBuffer.begin(), read);
             remaining -= read;
             ptr += read;
             if (read == bufferPos) {
@@ -312,15 +311,15 @@ bool bochan::AudioFileProvider::readFrame() {
         if (ret = swr_convert_frame(swrContext, resampledFrame, frame); ret < 0) {
             BOCHAN_LOG_AV_ERROR("Failed to resample frame: {}", ret);
         } else {
-            size_t remaining = bufferSize - bufferPos;
+            size_t remaining = internalBuffer.size_bytes() - bufferPos;
             //size_t linesize = av_samples_get_buffer_size(resampledFrame->linesize, resampledFrame->channels, resampledFrame->nb_samples, static_cast<AVSampleFormat>(resampledFrame->format), 0);
             size_t linesize = sizeof(int16_t) * resampledFrame->nb_samples * resampledFrame->channels;
             if (remaining < linesize) {
                 size_t toFree = linesize - remaining;
-                BOCHAN_WARN("Buffer overflow! Needed {} bytes, got {}/{}. Truncating {} bytes...", linesize, remaining, bufferSize, toFree);
+                BOCHAN_WARN("Buffer overflow! Needed {} bytes, got {}/{}. Truncating {} bytes...", linesize, remaining, internalBuffer.size_bytes(), toFree);
                 reduceBuffer(toFree);
             }
-            memcpy(internalBuffer + bufferPos, resampledFrame->extended_data[0], linesize);
+            memcpy(internalBuffer.begin() + bufferPos, resampledFrame->extended_data[0], linesize);
             bufferPos += linesize;
         }
         av_frame_unref(resampledFrame);
@@ -332,7 +331,7 @@ bool bochan::AudioFileProvider::readFrame() {
 void bochan::AudioFileProvider::reduceBuffer(size_t size) {
     assert(bufferPos >= size);
     if (bufferPos > size) {
-        memmove(internalBuffer, internalBuffer + size, bufferPos - size);
+        memmove(internalBuffer.begin(), internalBuffer.begin() + size, bufferPos - size);
     }
     bufferPos -= size;
 }

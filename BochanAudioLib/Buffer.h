@@ -18,12 +18,14 @@ namespace bochan {
         size_t getUsedByteSize() const;
         void setUsedSize(size_t usedSize);
         void setUsedByteSize(size_t usedByteSize);
+        gsl::span<T> getSpan() const;
+        template <typename U> gsl::span<U> getSpan() const;
     private:
         T* data;
         size_t size, byteSize, usedSize;
     };
 
-    template <typename T> bochan::Buffer<T>::Buffer(size_t size) : data(new T[size]), size(size), byteSize(size * sizeof(T)), usedSize(byteSize) {}
+    template <typename T> bochan::Buffer<T>::Buffer(size_t size) : data(new T[size]), size(size), byteSize(size * sizeof(T)), usedSize(size) {}
 
     template <typename T> bochan::Buffer<T>::~Buffer() {
         delete[] data;
@@ -62,8 +64,15 @@ namespace bochan {
 
     template<typename T>
     void bochan::Buffer<T>::setUsedByteSize(size_t usedByteSize) {
+        assert(usedByteSize % sizeof(T) == 0);
         assert(usedSize >= 0ULL && usedSize <= byteSize);
         this->usedSize = usedByteSize / sizeof(T);
+    }
+
+    template<typename T> template<typename U>
+    gsl::span<U> Buffer<T>::getSpan() const {
+        assert((usedSize * sizeof(T)) % sizeof(U) == 0);
+        return gsl::make_span<U>(reinterpret_cast<U*>(data), usedSize * sizeof(T) / sizeof(U));
     }
 
     using ByteBuffer = Buffer<uint8_t>;

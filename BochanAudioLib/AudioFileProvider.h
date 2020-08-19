@@ -14,7 +14,7 @@ namespace bochan {
     public:
         AudioFileProvider() = default;
         BOCHANAPI ~AudioFileProvider();
-        BOCHANAPI bool initialize(gsl::not_null<const char*> fileName, int sampleRate, size_t bufferSize);
+        BOCHANAPI bool initialize(gsl::cstring_span fileName, int sampleRate, size_t bufferSize);
         BOCHANAPI void deinitialize() override;
         BOCHANAPI bool isInitialized() const override;
         BOCHANAPI bool fillBuffer(gsl::not_null<ByteBuffer*> buff) override;
@@ -32,14 +32,14 @@ namespace bochan {
         BOCHANAPI bool readFrame();
         BOCHANAPI void reduceBuffer(size_t size);
         bool initialized{ false };
-        const char* fileName{ nullptr };
+        gsl::cstring_span fileName{ nullptr };
         int sampleRate{ 0 }, streamId{ -1 };
         bool startPointAvailable{ false }, simulateTime{ true };
         std::atomic_bool eof{ false };
         std::chrono::system_clock::time_point startPoint{};
-        size_t bufferSize{ 0ULL }, bufferPos{ 0ULL };
+        gsl::span<uint8_t> internalBuffer{ };
+        size_t bufferPos{ 0ULL };
         int bytesPerSample{ 0 };
-        uint8_t* internalBuffer{ nullptr };
         std::recursive_mutex formatMutex{};
         AVPacket* packet{ nullptr };
         AVFrame* frame{ nullptr }, * resampledFrame{ nullptr };

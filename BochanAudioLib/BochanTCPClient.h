@@ -12,7 +12,7 @@ namespace bochan {
         BochanTCPClient(BochanTCPClient&&) = delete;
         BochanTCPClient& operator=(BochanTCPClient&) = delete;
         BochanTCPClient& operator=(BochanTCPClient&&) = delete;
-        bool connect(gsl::not_null<const char*> ipAddress, unsigned short port) override;
+        bool connect(gsl::cstring_span ipAddress, unsigned short port) override;
         bool send(gsl::not_null<ByteBuffer*> buff) override;
         ByteBuffer* receive() override;
         bool shutdown() override;

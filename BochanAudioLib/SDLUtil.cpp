@@ -34,8 +34,8 @@ void bochan::SDLUtil::quitAudio(void* owner) {
     }
 }
 
-std::vector<const char*> bochan::SDLUtil::getAudioDrivers() {
-    std::vector<const char*> result{};
+std::vector<gsl::cstring_span> bochan::SDLUtil::getAudioDrivers() {
+    std::vector<gsl::cstring_span> result{};
     const int DRIVERS = SDL_GetNumAudioDrivers();
     for (int i = 0; i < DRIVERS; ++i) {
         result.push_back(SDL_GetAudioDriver(i));

@@ -178,7 +178,8 @@ std::vector<bochan::AudioPacket> bochan::BochanEncoder::encode(gsl::not_null<Byt
         }
         case AVSampleFormat::AV_SAMPLE_FMT_FLT:
         {
-            CodecUtil::int16ToFloat(samples, reinterpret_cast<float*>(frame->data[0]));
+            gsl::span<int16_t> int16Span{ samples->getSpan<int16_t>() };
+            CodecUtil::int16ToFloat(int16Span, gsl::make_span<float>(reinterpret_cast<float*>(frame->data[0]), int16Span.size()));
             break;
         }
         default:

@@ -7,8 +7,8 @@ namespace bochan {
     public:
         AudioPlayer() = default;
         virtual ~AudioPlayer() = default;
-        bool initializeDefault(const char* audioDevice, int sampleRate);
-        virtual bool initialize(const char* audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) = 0;
+        bool initializeDefault(gsl::cstring_span audioDevice, int sampleRate);
+        virtual bool initialize(gsl::cstring_span audioDevice, int sampleRate, size_t minBufferSize, size_t maxBufferSize) = 0;
         virtual void deinitialize() = 0;
         virtual bool isInitialized() const = 0;
         virtual size_t queueData(gsl::not_null<ByteBuffer*> buff) = 0;
@@ -16,7 +16,7 @@ namespace bochan {
         virtual bool play() = 0;
         virtual void stop() = 0;
         virtual void flush() = 0;
-        virtual std::vector<const char*> getAvailableDevices() const = 0;
+        virtual std::vector<gsl::cstring_span> getAvailableDevices() const = 0;
         size_t getMinBufferSize() const;
         size_t getMaxBufferSize() const;
     protected:
